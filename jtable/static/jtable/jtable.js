@@ -36,6 +36,7 @@ let JTable = class{
         console.log(this.column_names);
         var header = this.my_html.createTHead();
         let header_row = header.insertRow(0);
+        
         for (let i =0; i < this.column_names.length; i ++){
             var th = document.createElement('th');
             th.classList.add('jtable_header');
@@ -56,11 +57,19 @@ let JTable = class{
                 td.innerHTML = this.data[i][this.column_names[f]];
             }
         }
+        this.my_top = my_table.my_html.getBoundingClientRect().top;
+        
 
     }
 
     show(){
         this.my_html.display='block';
+    }
+
+    add_column_header_listeners(){
+        for(let i =0; i <this.column_names; i ++){
+
+        }
     }
 };
 

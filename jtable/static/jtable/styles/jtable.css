@@ -10,6 +10,12 @@
 
 .jtable_table td { overflow: hidden; }
 
+#table_container{
+    position:fixed;
+    overflow-y: scroll;
+    height: 60%;
+}
+
 th {
     background: white;
     position: sticky;
@@ -19,6 +25,10 @@ th {
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
   }
 
+#other_div{
+    top:80%;
+    position: fixed;
+}
 #fixed_divss{
     position: fixed;
 }
