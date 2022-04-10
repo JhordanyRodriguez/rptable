@@ -18,7 +18,7 @@ let JTable = class{
             parent.appendChild(this.my_html);
             this.my_html.id = 0;
             this.column_headers = [];
-            
+            this.my_html.classList.add('jtable_table');
         }
     };
 
@@ -34,11 +34,17 @@ let JTable = class{
         this.data = data;
         this.column_names = Object.keys(this.data[0]);
         console.log(this.column_names);
-        let header_table = this.my_html.insertRow(0);
+        var header = this.my_html.createTHead();
+        let header_row = header.insertRow(0);
         for (let i =0; i < this.column_names.length; i ++){
-            let td = header_table.insertCell();
-            td.id = this.name +"__header__"+this.column_names;
-            td.innerHTML = this.column_names[i];            
+            var th = document.createElement('th');
+            th.classList.add('jtable_header');
+            th.innerHTML = this.column_names[i];            
+            //let td = header_row.insertCell();
+            th.id = this.name +"__header__"+this.column_names;
+            header_row.appendChild(th);
+            //td.classList.add('jtable_header');
+            //td.innerHTML = this.column_names[i];            
         }
         // now we fill the data 
         for (let i =0; i < this.data.length; i ++)
