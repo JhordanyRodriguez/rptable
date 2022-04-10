@@ -1,0 +1,5 @@
+db.sqlite3
+*.pyc$
+jtable_demo/__pycache__/*
+jtable/__pycache__/*
+jtable/migrations/__pycache__/*
