@@ -1,1 +1,2 @@
-alert('hola amigos, making a change here '+ data.Product);
+alert('hola amigos, making a change here ');
+console.log(reserve_animals);
