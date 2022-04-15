@@ -2,6 +2,12 @@
     background-color: blue;
 }
 
+.jtable_input{
+    width: 100%;
+    height: 100%;
+    border-width: 0ch;
+}
+
 .jtable_table{
     table-layout:fixed; 
     width: 98%;
@@ -26,11 +32,12 @@ th {
   }
 
 th.jtable_filter{
-    background-color: purple;
+    background-color: white;
     position: sticky;
     table-layout: fixed;
-    color: white;
+    color: black;
     top: 40px; /* Don't forget this, required for the stickiness */
+
 }
 #other_div
 {

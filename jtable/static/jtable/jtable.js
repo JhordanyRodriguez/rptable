@@ -1,4 +1,15 @@
 //https://www.w3schools.com/jsref/dom_obj_table.asp
+/**
+ * creates an input with id 'input_in__x' where x is id of html_cell
+ * @param {html} html_cell the html object to which an input will be added.
+ * @param {string} class_to_apply A class that will be assigned to the inputs created
+ */
+function add_input_to_cell(html_cell, class_to_apply){
+    let my_input = document.createElement('input');
+    my_input.classList.add(class_to_apply);
+    my_input.id = 'input_in__'+ html_cell.id;
+    html_cell.appendChild(my_input);
+}
 
 let JTable = class{
     /**
@@ -67,7 +78,7 @@ let JTable = class{
         if (headers != undefined && headers.length > 0){
             let first_header_bottom = headers[0].getBoundingClientRect().bottom;
             let first_header_top = headers[0].getBoundingClientRect().top;
-            let new_top = (first_header_bottom - first_header_top)*2 +5;
+            let new_top = (first_header_bottom - first_header_top)*2 +3;
             let filters = document.getElementsByClassName("jtable_filter");
             if (filters != undefined){
                 for (let i=0; i < filters.length; i ++){
@@ -80,19 +91,24 @@ let JTable = class{
 
     create_filters()
     {
-        
-        
+        // we first create the cells
         this.filter_row =this.header.insertRow(1);
         console.log('inserted row filter');
         for (let i =0; i < this.column_names.length; i ++)
         {
             var th = document.createElement('th');
             th.classList.add('jtable_filter');
-            th.innerHTML = this.column_names[i];            
-            th.id = this.name +"__filter__"+this.column_names;
+            //th.innerHTML = this.column_names[i];
+            th.id = 'jtable_filter__'+this.column_names[i].replace(' ','_');
             this.filter_row.appendChild(th);
         }
+        for (let i =0; i< this.filter_row.children.length; i++){
+            console.log('adding');
+            add_input_to_cell(this.filter_row.children[i], "jtable_input");
+        }
     }
+
+
 
     fill_data(){
         // now we fill the data 
