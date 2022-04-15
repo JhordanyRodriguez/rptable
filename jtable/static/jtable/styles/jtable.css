@@ -25,10 +25,19 @@ th {
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
   }
 
-#other_div{
+th.jtable_filter{
+    background-color: purple;
+    position: sticky;
+    table-layout: fixed;
+    color: white;
+    top: 40px; /* Don't forget this, required for the stickiness */
+}
+#other_div
+{
     top:80%;
     position: fixed;
 }
+
 #fixed_divss{
     position: fixed;
 }
