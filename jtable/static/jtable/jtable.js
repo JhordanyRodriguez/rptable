@@ -2,13 +2,48 @@
 /**
  * creates an input with id 'input_in__x' where x is id of html_cell
  * @param {html} html_cell the html object to which an input will be added.
- * @param {string} class_to_apply A class that will be assigned to the inputs created
+ * @param {string} classes_to_apply A class that will be assigned to the inputs created
  */
-function add_input_to_cell(html_cell, class_to_apply){
+function add_input_to_cell(html_cell, classes_to_apply){
     let my_input = document.createElement('input');
-    my_input.classList.add(class_to_apply);
+    classes_to_apply.forEach(x=> my_input.classList.add(x));
+    //my_input.classList.add(class_to_apply);
     my_input.id = 'input_in__'+ html_cell.id;
+    my_input.setAttribute('current_runs',0);
     html_cell.appendChild(my_input);
+}
+
+function filter_action(target, current_runs){
+    let updated = target.getAttribute('current_runs');
+    updated = parseInt(updated);
+    // after the given time no new updates
+    if (updated == current_runs){
+        console.log('running');
+        console.log(target.value);
+        target.setAttribute("current_runs",0);
+    }
+    /*
+    else{
+        console.log('no running '+ updated + " and "+ current_runs);
+    }
+    */
+}
+
+/**
+ * 
+ * @param {int} timeout 
+ * @param {function} event_handler (target, current run)
+ * @returns 
+ */
+function get_edit_listener_filters(timeout, event_handler){
+    return (event)=>{
+        let previous_attribute = event.target.getAttribute('current_runs');
+        previous_attribute = parseInt(previous_attribute);
+        let my_run   = previous_attribute+1;
+        event.target.setAttribute("current_runs", my_run);
+        setTimeout(event_handler, timeout, event.target, my_run);
+    // console.log(event.target);
+    }
 }
 
 let JTable = class{
@@ -104,8 +139,10 @@ let JTable = class{
         }
         for (let i =0; i< this.filter_row.children.length; i++){
             console.log('adding');
-            add_input_to_cell(this.filter_row.children[i], "jtable_input");
+            add_input_to_cell(this.filter_row.children[i], ["jtable_input", "jtable_filter"]);
         }
+        let get_edit_listener = get_edit_listener_filters(500, filter_action);
+        this.filter_row.addEventListener('input', get_edit_listener);
     }
 
 
@@ -123,6 +160,8 @@ let JTable = class{
         }
         this.my_top = my_table.my_html.getBoundingClientRect().top;
     }
+
+
 
     show(){
         this.my_html.display='block';
