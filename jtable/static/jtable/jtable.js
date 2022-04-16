@@ -11,37 +11,24 @@ function add_input_to_cell(html_cell, classes_to_apply){
     my_input.id = 'input_in__'+ html_cell.id;
     my_input.setAttribute('current_runs',0);
     html_cell.appendChild(my_input);
+    return my_input;
 }
 
-function filter_action(target, current_runs){
-    let updated = target.getAttribute('current_runs');
-    updated = parseInt(updated);
-    // after the given time no new updates
-    if (updated == current_runs){
-        console.log('running');
-        console.log(target.value);
-        target.setAttribute("current_runs",0);
-    }
-    /*
-    else{
-        console.log('no running '+ updated + " and "+ current_runs);
-    }
-    */
-}
+
 
 /**
- * 
+ * @param {jtable} my_table
  * @param {int} timeout 
  * @param {function} event_handler (target, current run)
  * @returns 
  */
-function get_edit_listener_filters(timeout, event_handler){
+function get_edit_listener_filters(my_table, timeout, event_handler){
     return (event)=>{
         let previous_attribute = event.target.getAttribute('current_runs');
         previous_attribute = parseInt(previous_attribute);
         let my_run   = previous_attribute+1;
         event.target.setAttribute("current_runs", my_run);
-        setTimeout(event_handler, timeout, event.target, my_run);
+        setTimeout(event_handler,  timeout,my_table, event.target, my_run);
     // console.log(event.target);
     }
 }
@@ -54,6 +41,7 @@ let JTableData = class{
     constructor(html_row){
         this.row = html_row;
         this.status = 'created';
+        this.display = true;
     }
 
 }
@@ -87,6 +75,8 @@ let JTable = class{
      */
     set_data(data){
         this.data = data;
+        // simple array that will make it easier to map the filters results
+        this.indices = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
     }
 
     /**
@@ -136,31 +126,87 @@ let JTable = class{
         }
     }
 
+
+    filter_action(my_table, target, current_runs){
+        let updated = target.getAttribute('current_runs');
+        updated = parseInt(updated);
+        // after the given time no new updates
+        if (updated == current_runs){
+            let column = target.getAttribute('column_name');
+            let filter_value = target.value;
+            console.log(target.value);
+            console.log(column);        
+            // get the list of boolean values where 1 indicates
+            // that the object passes the filter
+            let pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);
+            let original_states = Array.apply(null, Array(my_table.data.length)).map(function(x,i){return my_table.html_mirror[i].display});
+            console.log('original states');
+            console.log(original_states);
+            let changes_required = Array.apply(original_states, Array(my_table.data.length)).map(function(x,i)
+                                                                                                {
+                                                                                                    return original_states[i] != pass_result[i]
+                                                                                                });
+            
+            console.log('changes required ');
+            console.log(changes_required);
+
+            let false_indices = my_table.indices.filter((x)=> pass_result[x]== false && changes_required[x]==true);
+            let true_indices = my_table.indices.filter((x)=> pass_result[x]== true && changes_required[x] == true);
+
+
+            console.log(original_states);
+            for (let i =0; i < false_indices.length; i ++){
+                my_table.html_mirror[false_indices[i]].row.style.display ="none";
+                my_table.html_mirror[false_indices[i]].display = false;
+                console.log('changing to false');
+            }
+          
+            
+            for (let i =0; i < true_indices.length; i ++){
+                my_table.html_mirror[true_indices[i]].row.style.display ="table-row";
+                my_table.html_mirror[true_indices[i]].display = true;
+                console.log('changing to true');
+            }
+            
+            target.setAttribute("current_runs",0);
+        }
+        /*
+        else{
+            console.log('no running '+ updated + " and "+ current_runs);
+        }
+        */
+    }
+
     create_filters()
     {
         // we first create the cells
         this.filter_row =this.header.insertRow(1);
         console.log('inserted row filter');
-        for (let i =0; i < this.column_names.length; i ++)
+        let columns_to_filter = this.column_names.filter((x)=> x != undefined);
+        for (let i =0; i < columns_to_filter.length; i ++)
         {
             var th = document.createElement('th');
             th.classList.add('jtable_filter');
             //th.innerHTML = this.column_names[i];
-            th.id = 'jtable_filter__'+this.column_names[i].replace(' ','_');
+            th.id = 'jtable_filter__'+columns_to_filter[i].replace(' ','_');
             this.filter_row.appendChild(th);
         }
         for (let i =0; i< this.filter_row.children.length; i++){
             console.log('adding');
-            add_input_to_cell(this.filter_row.children[i], ["jtable_input", "jtable_filter"]);
+            let my_input = add_input_to_cell(this.filter_row.children[i], ["jtable_input", "jtable_filter"]);
+            my_input.setAttribute('column_name', columns_to_filter[i]);
         }
-        let get_edit_listener = get_edit_listener_filters(500, filter_action);
+        console.log('before');
+        console.log(this);
+        let get_edit_listener = get_edit_listener_filters(this, 500, this.filter_action);
         this.filter_row.addEventListener('input', get_edit_listener);
     }
 
 
     /**
      * It also creates attribute 'html_mirror'. Entry ith in html_mirror holds the 
-     * html data corresponding to the ith entry in the original data
+     * html data corresponding to the ith entry in the original data. i.e, we have
+     * a one to one index-based mapping between the original data and html_mirror
      */
     fill_data(){
         // create a placeholder element:
