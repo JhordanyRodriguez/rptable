@@ -46,6 +46,18 @@ function get_edit_listener_filters(timeout, event_handler){
     }
 }
 
+let JTableData = class{
+    /**
+     * 
+     * @param {html} html_row 
+     */
+    constructor(html_row){
+        this.row = html_row;
+        this.status = 'created';
+    }
+
+}
+
 let JTable = class{
     /**
      * Returns a table
@@ -146,8 +158,13 @@ let JTable = class{
     }
 
 
-
+    /**
+     * It also creates attribute 'html_mirror'. Entry ith in html_mirror holds the 
+     * html data corresponding to the ith entry in the original data
+     */
     fill_data(){
+        // create a placeholder element:
+        this.html_mirror = Array.apply(null, Array(this.data.length)).map(function () {})
         // now we fill the data 
         for (let i =0; i < this.data.length; i ++)
         {
@@ -155,8 +172,9 @@ let JTable = class{
             for (let f =0; f < this.column_names.length; f++)
             {
                 let td = data_row.insertCell();
-                td.innerHTML = this.data[i][this.column_names[f]];
+                td.innerHTML = this.data[i][this.column_names[f]];                
             }
+            this.html_mirror[i] = new JTableData(data_row); 
         }
         this.my_top = my_table.my_html.getBoundingClientRect().top;
     }
