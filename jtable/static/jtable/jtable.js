@@ -38,10 +38,18 @@ let JTableData = class{
      * 
      * @param {html} html_row 
      */
-    constructor(html_row){
+    constructor(html_row, column_names){
         this.row = html_row;
         this.status = 'created';
         this.display = true;
+        //filter status will be true if the object is visible
+        this.filter_status = Array.apply(column_names, Array(column_names.length))
+                            .map(function(value, index, column_namesi)
+                            {
+                                //console.log(column_names);
+                                //console.log(value);
+                                return {"name": column_names[index],"status":true, "index":index}
+                            });
     }
 
 }
@@ -126,55 +134,82 @@ let JTable = class{
         }
     }
 
-
+    /**
+     * This function gets called when a filter box is being  edited.
+     * @param {JTable} my_table 
+     * @param {*} target 
+     * @param {*} current_runs 
+     */
     filter_action(my_table, target, current_runs){
         let updated = target.getAttribute('current_runs');
         updated = parseInt(updated);
         // after the given time no new updates
-        if (updated == current_runs){
+        if (updated == current_runs)
+        {
             let column = target.getAttribute('column_name');
             let filter_value = target.value;
             console.log(target.value);
             console.log(column);        
             // get the list of boolean values where 1 indicates
             // that the object passes the filter
-            let pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);
-            let original_states = Array.apply(null, Array(my_table.data.length)).map(function(x,i){return my_table.html_mirror[i].display});
+            const my_column_index = my_table.column_names.findIndex(x=>x==column);
+
+            let pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);           
+            let original_states = Array.apply(null,
+                                              Array(my_table.data.length)).map(function(x,i)
+                                              {return my_table.html_mirror[i].display});
+            
+            // the ith entry will be True if the ith data element passes all the other filters.
+            // we do this to prevent rows passing the current test but that fail another filter from
+            // becoming visible again                                 
+            let other_filters = Array.apply(null, Array(my_table.data.length)).map(function(v,i)
+                                    {
+                                      const active_filter = my_table.html_mirror[i].filter_status.find(x=>x.status == false && x.index != my_column_index)
+                                      return active_filter == undefined
+                                    });
+            
+            // those rows which result disagrees with its current state. 
+            let changes_required = Array.apply(original_states,
+                                               Array(my_table.data.length)).map(function(x,i)
+                                               {
+                                                   return original_states[i] != pass_result[i]
+                                               });
+            /*
+            console.log('pass results');
+            console.log(pass_result);
             console.log('original states');
             console.log(original_states);
-            let changes_required = Array.apply(original_states, Array(my_table.data.length)).map(function(x,i)
-                                                                                                {
-                                                                                                    return original_states[i] != pass_result[i]
-                                                                                                });
-            
+            console.log('other filters');
+            console.log(other_filters);
             console.log('changes required ');
             console.log(changes_required);
+            */
 
             let false_indices = my_table.indices.filter((x)=> pass_result[x]== false && changes_required[x]==true);
-            let true_indices = my_table.indices.filter((x)=> pass_result[x]== true && changes_required[x] == true);
-
-
+            // all the entries that this filter caused them to be 0                                   
             console.log(original_states);
             for (let i =0; i < false_indices.length; i ++){
                 my_table.html_mirror[false_indices[i]].row.style.display ="none";
                 my_table.html_mirror[false_indices[i]].display = false;
+                my_table.html_mirror[false_indices[i]].filter_status[my_column_index].status = false;
                 console.log('changing to false');
-            }
-          
+            }  
             
-            for (let i =0; i < true_indices.length; i ++){
-                my_table.html_mirror[true_indices[i]].row.style.display ="table-row";
-                my_table.html_mirror[true_indices[i]].display = true;
-                console.log('changing to true');
+            for (let i =0; i < pass_result.length; i ++){
+                if (pass_result[i] == true)
+                {
+                    my_table.html_mirror[i].filter_status[my_column_index].status = true;
+                    if (other_filters[i]== true)
+                    {
+                        // general display will only be true if the other filters agree
+                        my_table.html_mirror[i].display = true;
+                        my_table.html_mirror[i].row.style.display ="table-row";
+                    }
+                }
             }
             
             target.setAttribute("current_runs",0);
         }
-        /*
-        else{
-            console.log('no running '+ updated + " and "+ current_runs);
-        }
-        */
     }
 
     create_filters()
@@ -220,7 +255,7 @@ let JTable = class{
                 let td = data_row.insertCell();
                 td.innerHTML = this.data[i][this.column_names[f]];                
             }
-            this.html_mirror[i] = new JTableData(data_row); 
+            this.html_mirror[i] = new JTableData(data_row, this.column_names); 
         }
         this.my_top = my_table.my_html.getBoundingClientRect().top;
     }
