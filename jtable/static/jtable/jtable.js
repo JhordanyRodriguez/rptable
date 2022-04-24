@@ -119,11 +119,16 @@ let JTable = class{
      */
     set_filter_top(){
         // we get the bottom of the headers row
+        let isChrome = navigator.userAgent.toLowerCase().indexOf('chrome')>=0;
+
         let headers = document.getElementsByClassName("jtable_header");
         if (headers != undefined && headers.length > 0){
             let first_header_bottom = headers[0].getBoundingClientRect().bottom;
             let first_header_top = headers[0].getBoundingClientRect().top;
-            let new_top = (first_header_bottom - first_header_top)*2 +3;
+            let new_top =  (first_header_bottom - first_header_top);
+            if (isChrome == false){
+                new_top = new_top*2 +3;
+            }
             let filters = document.getElementsByClassName("jtable_filter");
             if (filters != undefined){
                 for (let i=0; i < filters.length; i ++){
@@ -153,6 +158,7 @@ let JTable = class{
             // get the list of boolean values where 1 indicates
             // that the object passes the filter
             const my_column_index = my_table.column_names.findIndex(x=>x==column);
+            console.log('column index is ---------> '+my_column_index);
 
             let pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);           
             let original_states = Array.apply(null,
@@ -184,14 +190,18 @@ let JTable = class{
             console.log('changes required ');
             console.log(changes_required);
             */
-
+           
+            // even if they were not being display before, they should have their filter status set to zero
+            let this_filter_false = my_table.indices.filter((x)=> pass_result[x]== false);
+            for (let i =0; i < this_filter_false.length; i ++){
+                my_table.html_mirror[this_filter_false[i]].filter_status[my_column_index].status = false;
+            }
             let false_indices = my_table.indices.filter((x)=> pass_result[x]== false && changes_required[x]==true);
             // all the entries that this filter caused them to be 0                                   
             console.log(original_states);
             for (let i =0; i < false_indices.length; i ++){
                 my_table.html_mirror[false_indices[i]].row.style.display ="none";
                 my_table.html_mirror[false_indices[i]].display = false;
-                my_table.html_mirror[false_indices[i]].filter_status[my_column_index].status = false;
                 console.log('changing to false');
             }  
             
