@@ -14,6 +14,50 @@ function add_input_to_cell(html_cell, classes_to_apply){
     return my_input;
 }
 
+/**
+ * 
+ * @param {JTable} my_table 
+ * @param {String} filter_value 
+ * @param {String} column
+ */
+function apply_numeric_filter(my_table, filter_value, column){
+    let pass_result;
+    let my_mathematical_filters = [">=", "<=","<",">","==","!="];
+    let myfunctions =[(x,y)=> x>=y
+                     ,(x,y)=> x<=y
+                     ,(x,y)=> x<y
+                     ,(x,y)=> x>y
+                     ,(x,y)=> x==y
+                     ,(x,y)=> x!=y];
+    for (let m =0; m < my_mathematical_filters.length; m++)
+    {
+        let mf = my_mathematical_filters[m];
+        let my_function = myfunctions[m];
+        console.log('will grab argument 1'+ mf);
+        if (filter_value.indexOf(mf) ==0){
+            console.log('will grab argument '+ mf);
+            let argument = parseFloat(filter_value.replace(mf,''));
+            console.log('argument is '+ argument);
+            if (!isNaN(argument)){
+                console.log('will do it WITH '+ mf);
+                pass_result  = my_table.data.map((x)=> my_function(x[column],argument));
+            }
+            else
+            {
+                pass_result  = my_table.data.map((x)=> x[column].toString().indexOf(filter_value)>=0);        
+            }
+
+            return pass_result;
+        }
+    }
+    if (filter_value.indexOf("=")==0){
+        alert("Warning, detected equality operator in filter. If you intend to check for numerical equality use ==");
+        
+    }
+    pass_result  = my_table.data.map((x)=> x[column].toString().indexOf(filter_value)>=0);
+    return pass_result;
+}
+
 
 
 /**
@@ -175,21 +219,7 @@ let JTable = class{
             
             let pass_result;
             if (my_table.columns_info[my_column_index].type == "number"){
-                if (filter_value.indexOf(">") ==0){
-                    let argument = parseFloat(filter_value.replace('>',''));
-                    if (!isNaN(argument)){
-                        console.log('will do it');
-                        pass_result  = my_table.data.map((x)=> x[column] > argument);
-                    }
-                    else
-                    {
-                        pass_result  = my_table.data.map((x)=> x[column].toString().indexOf(filter_value)>=0);        
-                    }
-                }
-                else
-                {
-                    pass_result  = my_table.data.map((x)=> x[column].toString().indexOf(filter_value)>=0);
-                }
+                pass_result = apply_numeric_filter(my_table, filter_value, column);
             }
             else{
                 pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);
