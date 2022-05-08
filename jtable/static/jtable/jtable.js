@@ -71,7 +71,7 @@ let JTable = class{
             this.my_html = document.createElement('TABLE');
             parent.appendChild(this.my_html);
             this.my_html.id = 0;
-            this.column_headers = [];
+            this.columns_info = [];
             this.my_html.classList.add('jtable_table');
             this.header = null;
         }
@@ -83,6 +83,20 @@ let JTable = class{
      */
     set_data(data){
         this.data = data;
+        this.column_names = Object.keys(this.data[0]);
+        this.columns_info = Array.apply(null, Array(this.column_names.length)).map(function(x,i){
+                                                                                return {"index": i,
+                                                                                        "name": x,
+                                                                                        "type":"string"};
+                                                                                    });
+        for (let c =0; c < this.column_names.length; c ++){
+            let this_column = this.column_names[c];
+            let no_number = this.data.findIndex((x)=> isNaN(parseFloat(x[this_column])));
+            if (no_number == -1){
+                this.columns_info[c].type = "number";
+                
+            }
+        }
         // simple array that will make it easier to map the filters results
         this.indices = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
     }
@@ -97,7 +111,7 @@ let JTable = class{
      */
     create_headers()
     {        
-        this.column_names = Object.keys(this.data[0]);
+        
         console.log(this.column_names);
         this.header = this.my_html.createTHead();
         let header_row = this.header.insertRow(0);
@@ -153,14 +167,35 @@ let JTable = class{
         {
             let column = target.getAttribute('column_name');
             let filter_value = target.value;
-            console.log(target.value);
-            console.log(column);        
             // get the list of boolean values where 1 indicates
             // that the object passes the filter
             const my_column_index = my_table.column_names.findIndex(x=>x==column);
-            console.log('column index is ---------> '+my_column_index);
+            console.log('applying filter to column '+ column + '(index '+my_column_index +') with value '+ target.value);
 
-            let pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);           
+            
+            let pass_result;
+            if (my_table.columns_info[my_column_index].type == "number"){
+                if (filter_value.indexOf(">") ==0){
+                    let argument = parseFloat(filter_value.replace('>',''));
+                    if (!isNaN(argument)){
+                        console.log('will do it');
+                        pass_result  = my_table.data.map((x)=> x[column] > argument);
+                    }
+                    else
+                    {
+                        pass_result  = my_table.data.map((x)=> x[column].toString().indexOf(filter_value)>=0);        
+                    }
+                }
+                else
+                {
+                    pass_result  = my_table.data.map((x)=> x[column].toString().indexOf(filter_value)>=0);
+                }
+            }
+            else{
+                pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);
+            }
+            console.log('pass values');
+            console.log(pass_result);
             let original_states = Array.apply(null,
                                               Array(my_table.data.length)).map(function(x,i)
                                               {return my_table.html_mirror[i].display});
@@ -170,7 +205,8 @@ let JTable = class{
             // becoming visible again                                 
             let other_filters = Array.apply(null, Array(my_table.data.length)).map(function(v,i)
                                     {
-                                      const active_filter = my_table.html_mirror[i].filter_status.find(x=>x.status == false && x.index != my_column_index)
+                                      const active_filter = my_table.html_mirror[i].filter_status.find(x=>x.status == false
+                                                                                                       && x.index != my_column_index)
                                       return active_filter == undefined
                                     });
             
@@ -204,7 +240,7 @@ let JTable = class{
                 my_table.html_mirror[false_indices[i]].display = false;
                 console.log('changing to false');
             }  
-            
+            // bring back to view previously hidden rows
             for (let i =0; i < pass_result.length; i ++){
                 if (pass_result[i] == true)
                 {
