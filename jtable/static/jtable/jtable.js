@@ -119,6 +119,7 @@ let JTable = class{
             this.my_html.classList.add('jtable_table');
             this.header = null;
         }
+        this.name = name;
     };
 
     /**
@@ -128,7 +129,7 @@ let JTable = class{
     set_data(data){
         this.data = data;
         this.column_names = Object.keys(this.data[0]);
-        this.columns_info = Array.apply(null, Array(this.column_names.length)).map(function(x,i){
+        this.columns_info = Array.apply(this.column_names, Array(this.column_names.length)).map(function(x,i){
                                                                                 return {"index": i,
                                                                                         "name": x,
                                                                                         "type":"string"};
@@ -137,12 +138,14 @@ let JTable = class{
             let this_column = this.column_names[c];
             let no_number = this.data.findIndex((x)=> isNaN(parseFloat(x[this_column])));
             if (no_number == -1){
-                this.columns_info[c].type = "number";
-                
+                this.columns_info[c].type = "number";   
             }
+            this.columns_info[c].name = this.column_names[c];
         }
         // simple array that will make it easier to map the filters results
         this.indices = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
+        // an array that will contain the order in which rows will be shown.
+        this.ordered_indeces = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
     }
 
     /**
@@ -165,7 +168,7 @@ let JTable = class{
             th.classList.add('jtable_header');
             th.innerHTML = this.column_names[i];            
             //let td = header_row.insertCell();
-            th.id = this.name +"__header__"+this.column_names;
+            th.id = this.name +"__header__"+this.column_names[i];
             header_row.appendChild(th);          
         }
     }
@@ -334,6 +337,64 @@ let JTable = class{
             this.html_mirror[i] = new JTableData(data_row, this.column_names); 
         }
         this.my_top = my_table.my_html.getBoundingClientRect().top;
+    }
+
+    comparator_stringss(x,y, myta){
+        console.log('these are x and y ');
+        
+        return 0;
+    }
+    compare_strings(x,y){
+        //console.log('comparing ');
+        if (x<y){
+            return -1;
+        }
+        else if(x>y){
+            return 1;
+        }
+        else{
+            return 0;
+        }
+    }
+
+    obtain_sorter(column_name, column_index){
+        
+        let column_info = this.columns_info[column_index];
+        console.log('this is the column info ');
+        console.log(column_info);
+        let comparing_strings= (x,y)=> this.compare_strings(this.data[x][column_name],
+                                                            this.data[y][column_name]);
+        //this.ordered_indeces.sort((x,y)=> this.comparator_strings(x,y, this));
+        this.ordered_indeces.sort((x,y)=> comparing_strings(x,y));
+        console.log('this is the new order');
+        console.log(this.ordered_indeces);
+        
+    }
+
+    my_sorter(column_name){
+        alert(' will sort '+ column_name);
+    }
+    
+    
+
+    create_sorters(){
+        let sortable_columns = this.column_names.filter((x)=> x != undefined);
+        for (let i =0; i < sortable_columns.length; i ++)
+        {
+            let icolumn_name = this.column_names[i].replace(' ','_');
+            let _sorter_id = this.name +"__header__"+icolumn_name;
+            let _header = document.getElementById(_sorter_id);
+            if (_header != undefined){
+                console.log('adding click listener to '+ _sorter_id);
+                //_header.addEventListener('click', this.obtain_sorter(icolumn_name));
+                _header.addEventListener('click',
+                                         (e)=> this.obtain_sorter(icolumn_name, i));
+            }
+            else{
+                console.log('could not find header with id '+ _sorter_id);
+            }
+            
+        }
     }
 
 

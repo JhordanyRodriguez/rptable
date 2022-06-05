@@ -4,4 +4,5 @@ my_table.create_headers();
 my_table.create_filters(); 
 my_table.set_filter_top();
 my_table.fill_data();
+my_table.create_sorters()
 console.log(reserve_animals);
