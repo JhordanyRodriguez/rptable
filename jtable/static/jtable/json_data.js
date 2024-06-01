@@ -2,10 +2,10 @@
 const animals =["bear", "dog", "cat", "lion", "leopard", "tiger", "owl", "eagle", "puma", "zebra"];
 const genders =["female", "male"];
 const origins =["Colombia", "Australia", "Mexico", "United Kingdom", "New Zeland"];
-const carers =["Jose", "Hilda", "Jhordany","Yesenia"];
+const carers =["Jose", "Hilda", "Jasmine", "Jhordany","Yesenia"];
 
 reserve_animals = [];
-for(let i =0; i < 200; i ++){
+for(let i =0; i < 20000; i ++){
     let random_data = Math.round(Math.random()*100);
     let animal = animals[parseInt(random_data % animals.length)];
     random_data = Math.round(Math.random()*100);
@@ -20,6 +20,7 @@ for(let i =0; i < 200; i ++){
         "carer": carer
          });
 };
+alert('created data!')
 
 
 

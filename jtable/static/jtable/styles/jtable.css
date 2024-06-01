@@ -22,9 +22,18 @@
     height: 60%;
 }
 
+.jtable_header_mirror{
+    background-color: white;
+    z-index: 1;
+}
+
+.jtable_table_content_div{
+    margin-top: 21px; /* would like to make this dynamic*/
+}
+
 th {
     background: white;
-    position: sticky;
+    position: -webkit-sticky;
     table-layout: fixed;
     color: white;
     top: 0; /* Don't forget this, required for the stickiness */

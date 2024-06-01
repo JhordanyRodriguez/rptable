@@ -85,7 +85,7 @@ let JTableData = class{
     constructor(html_row, column_names){
         this.row = html_row;
         this.status = 'created';
-        this.display = true;
+        this.display = html_row != null ? true: false;
         //filter status will be true if the object is visible
         this.filter_status = Array.apply(column_names, Array(column_names.length))
                             .map(function(value, index, column_namesi)
@@ -94,6 +94,7 @@ let JTableData = class{
                                 //console.log(value);
                                 return {"name": column_names[index],"status":true, "index":index}
                             });
+        
     }
 
 }
@@ -105,21 +106,36 @@ let JTable = class{
      * @param {string} name name
      */
     constructor(html_parent, name){
-        let parent = document.getElementById(html_parent);
-        this.rows_per_page =60;
         if (parent== undefined){
             alert("could not find the parent to create the table");
+            return;
         } 
         else
         {
+            this.parent = document.getElementById(html_parent);
+            this.header_div = document.createElement('div');
+            this.header_div.style.position = 'fixed';
+            //this.header_div.textContent= 'holaaa';
+            this.table_container  = document.createElement('div');
+            this.table_container.classList.add('jtable_table_content_div');
+
+            this.table_container.style.overflowY= 'scroll';
+            this.rows_per_page =60;
             this.my_html = document.createElement('TABLE');
-            parent.appendChild(this.my_html);
+            this.header_div.my_html = document.createElement('TABLE');
+            this.header_div.my_html.setAttribute('table-layout','fixed');
+            this.header_div.appendChild(this.header_div.my_html);
+            this.table_container.appendChild(this.my_html);
             this.my_html.id = 0;
             this.columns_info = [];
             this.my_html.classList.add('jtable_table');
+            this.header_div.my_html.classList.add('jtable_table');
             this.header = null;
+            this.parent.appendChild(this.header_div);
+            this.parent.appendChild(this.table_container);
         }
         this.name = name;
+        
     };
 
     /**
@@ -134,9 +150,10 @@ let JTable = class{
                                                                                         "name": x,
                                                                                         "type":"string"};
                                                                                     });
+        let reduced_data = this.data.splice(0,500);                                                                           
         for (let c =0; c < this.column_names.length; c ++){
             let this_column = this.column_names[c];
-            let no_number = this.data.findIndex((x)=> isNaN(parseFloat(x[this_column])));
+            let no_number = reduced_data.findIndex((x)=> isNaN(parseFloat(x[this_column])));
             if (no_number == -1){
                 this.columns_info[c].type = "number";   
             }
@@ -146,6 +163,7 @@ let JTable = class{
         this.indices = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
         // an array that will contain the order in which rows will be shown.
         this.ordered_indeces = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
+        
     }
 
     /**
@@ -161,16 +179,28 @@ let JTable = class{
         
         console.log(this.column_names);
         this.header = this.my_html.createTHead();
+        this.mirror_header = this.header_div.my_html.createTHead()
+        this.header_div.classList.add('jtable_header_mirror');
         let header_row = this.header.insertRow(0);
+        let mirror_header_row = this.mirror_header.insertRow(0);
+        let column_width = 100/this.column_names.length;
         
         for (let i =0; i < this.column_names.length; i ++){
             var th = document.createElement('th');
+            let mth = document.createElement('th');
             th.classList.add('jtable_header');
+            mth.classList.add('jtable_header');
             th.innerHTML = this.column_names[i];            
+            mth.innerHTML = this.column_names[i];            
             //let td = header_row.insertCell();
             th.id = this.name +"__header__"+this.column_names[i];
-            header_row.appendChild(th);          
+            mth.id = this.name +"__mheader__"+this.column_names[i];
+            mth.style.width = column_width +'%';
+            header_row.appendChild(th);
+            mirror_header_row.appendChild(mth);  
         }
+
+        
     }
 
     /**
@@ -277,6 +307,23 @@ let JTable = class{
             for (let i =0; i < pass_result.length; i ++){
                 if (pass_result[i] == true)
                 {
+                    // if html_mirror has a null , we need to create the row
+                    // data_row has to be assigned:
+                    if (my_table.html_mirror[i].row == null)
+                    {
+                        // mytable or this?
+                        //console.log('this is this');
+                        //console.log(this);
+                        let data_row = my_table.my_html.insertRow();
+                        for (let f =0; f < my_table.column_names.length; f++)
+                        {
+                            let td = data_row.insertCell();
+                            td.innerHTML = my_table.data[i][my_table.column_names[f]];                
+                        }
+                        my_table.html_mirror[i].row = data_row;
+                    
+                    }
+
                     my_table.html_mirror[i].filter_status[my_column_index].status = true;
                     if (other_filters[i]== true)
                     {
@@ -294,7 +341,7 @@ let JTable = class{
     create_filters()
     {
         // we first create the cells
-        this.filter_row =this.header.insertRow(1);
+        this.filter_row =this.mirror_header.insertRow(1);//this.header.insertRow(1);
         console.log('inserted row filter');
         let columns_to_filter = this.column_names.filter((x)=> x != undefined);
         for (let i =0; i < columns_to_filter.length; i ++)
@@ -326,13 +373,18 @@ let JTable = class{
         // create a placeholder element:
         this.html_mirror = Array.apply(null, Array(this.data.length)).map(function () {})
         // now we fill the data 
-        for (let i =0; i < this.data.length; i ++)
+        //let reduced_data = this.data.splice(0, this.rows_per_page);
+        for (let i =0; i <this.data.length; i ++)
         {
-            let data_row = this.my_html.insertRow();
-            for (let f =0; f < this.column_names.length; f++)
+            let data_row = null;
+            if (i < this.rows_per_page)
             {
-                let td = data_row.insertCell();
-                td.innerHTML = this.data[i][this.column_names[f]];                
+                data_row = this.my_html.insertRow();
+                for (let f =0; f < this.column_names.length; f++)
+                {
+                    let td = data_row.insertCell();
+                    td.innerHTML = this.data[i][this.column_names[f]];                
+                }
             }
             this.html_mirror[i] = new JTableData(data_row, this.column_names); 
         }
@@ -357,17 +409,46 @@ let JTable = class{
         }
     }
 
+  
+
     obtain_sorter(column_name, column_index){
         
         let column_info = this.columns_info[column_index];
         console.log('this is the column info ');
         console.log(column_info);
+        let before_ordering = [...this.ordered_indeces];
+
         let comparing_strings= (x,y)=> this.compare_strings(this.data[x][column_name],
                                                             this.data[y][column_name]);
         //this.ordered_indeces.sort((x,y)=> this.comparator_strings(x,y, this));
         this.ordered_indeces.sort((x,y)=> comparing_strings(x,y));
         console.log('this is the new order');
         console.log(this.ordered_indeces);
+        console.log('this is the previous ');
+        console.log(before_ordering);
+        let parent_node = my_table.html_mirror[10].row.parentNode;
+        //every time there is a swap, the previous indixes get pushed one down.
+        // e.g if 6 is the first element now, we have 
+        // 6,0,1,2,3 ... the second entry will need to be compared swapped with 0, not 1
+        let n_swaps =0;
+        // only do the elements in the current page.
+        for (let i =0; i < this.ordered_indeces.length; i ++){
+            if (this.ordered_indeces[i] != before_ordering[i-n_swaps] | 4>3)
+            {
+                console.log('will swap  '+ this.ordered_indeces[i] + ' with '+ before_ordering[i]);
+                parent_node.insertBefore(this.html_mirror[this.ordered_indeces[i]].row,
+                                         this.html_mirror[before_ordering[i-n_swaps]].row)
+                n_swaps++;
+                // were was the first in the previous?
+                /*
+                if (i >1){
+                    break;
+                }
+                */
+            }
+           // this.html_mirror[i].row.insertBefore()
+        }
+       
         
     }
 
@@ -383,6 +464,7 @@ let JTable = class{
         {
             let icolumn_name = this.column_names[i].replace(' ','_');
             let _sorter_id = this.name +"__header__"+icolumn_name;
+            // this sorted id will need to refer to the newly created header_div
             let _header = document.getElementById(_sorter_id);
             if (_header != undefined){
                 console.log('adding click listener to '+ _sorter_id);
