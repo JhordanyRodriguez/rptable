@@ -162,7 +162,7 @@ let JTable = class{
         // simple array that will make it easier to map the filters results
         this.indices = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
         // an array that will contain the order in which rows will be shown.
-        this.ordered_indeces = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
+        this.ordered_indices = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
         
     }
 
@@ -416,14 +416,14 @@ let JTable = class{
         let column_info = this.columns_info[column_index];
         console.log('this is the column info ');
         console.log(column_info);
-        let before_ordering = [...this.ordered_indeces];
+        let before_ordering = [...this.ordered_indices];
 
         let comparing_strings= (x,y)=> this.compare_strings(this.data[x][column_name],
                                                             this.data[y][column_name]);
         //this.ordered_indeces.sort((x,y)=> this.comparator_strings(x,y, this));
-        this.ordered_indeces.sort((x,y)=> comparing_strings(x,y));
+        this.ordered_indices.sort((x,y)=> comparing_strings(x,y));
         console.log('this is the new order');
-        console.log(this.ordered_indeces);
+        console.log(this.ordered_indices);
         console.log('this is the previous ');
         console.log(before_ordering);
         let parent_node = my_table.html_mirror[10].row.parentNode;
@@ -432,11 +432,11 @@ let JTable = class{
         // 6,0,1,2,3 ... the second entry will need to be compared swapped with 0, not 1
         let n_swaps =0;
         // only do the elements in the current page.
-        for (let i =0; i < this.ordered_indeces.length; i ++){
-            if (this.ordered_indeces[i] != before_ordering[i-n_swaps] | 4>3)
+        for (let i =0; i < this.ordered_indices.length; i ++){
+            if (this.ordered_indices[i] != before_ordering[i-n_swaps] | 4>3)
             {
-                console.log('will swap  '+ this.ordered_indeces[i] + ' with '+ before_ordering[i]);
-                parent_node.insertBefore(this.html_mirror[this.ordered_indeces[i]].row,
+                console.log('will swap  '+ this.ordered_indices[i] + ' with '+ before_ordering[i]);
+                parent_node.insertBefore(this.html_mirror[this.ordered_indices[i]].row,
                                          this.html_mirror[before_ordering[i-n_swaps]].row)
                 n_swaps++;
                 // were was the first in the previous?
@@ -463,7 +463,7 @@ let JTable = class{
         for (let i =0; i < sortable_columns.length; i ++)
         {
             let icolumn_name = this.column_names[i].replace(' ','_');
-            let _sorter_id = this.name +"__header__"+icolumn_name;
+            let _sorter_id = this.name +"__mheader__"+icolumn_name;
             // this sorted id will need to refer to the newly created header_div
             let _header = document.getElementById(_sorter_id);
             if (_header != undefined){

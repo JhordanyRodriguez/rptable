@@ -17,6 +17,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path('jtable/', include('jtable.urls'), name="jtable_view"),
+    path('jrptable/', include('jrptable.urls'), name="jrptable_view"),
     path('admin/', admin.site.urls),
 ]
