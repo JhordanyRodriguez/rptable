@@ -1,20 +1,32 @@
-.jtable_header{
+.jrptable_header{
     background-color: blue;
 }
 
-.jtable_input{
+.jrptable_input{
     width: 100%;
     height: 100%;
     border-width: 0ch;
 }
 
-.jtable_table{
+tbody td{
+    border: solid;
+    border-color: lightgray;
+}
+
+.jrptable_input.jrptable_filter{
+    width: 94%;
+    border: solid;
+    border-color: cornflowerblue;
+    border-radius: 5px;
+}
+
+.jrptable_table{
     table-layout:fixed; 
     width: 98%;
     overflow-y: scroll;
 }
 
-.jtable_table td { overflow: hidden; }
+.jrptable_table td { overflow: hidden; }
 
 #table_container{
     position:fixed;
@@ -22,13 +34,13 @@
     height: 60%;
 }
 
-.jtable_header_mirror{
+.jrptable_header_mirror{
     background-color: white;
     z-index: 1;
 }
 
-.jtable_table_content_div{
-    margin-top: 21px; /* would like to make this dynamic*/
+.jrptable_table_content_div{
+    margin-top: 25px; /* would like to make this dynamic*/
 }
 
 th {
@@ -40,7 +52,7 @@ th {
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
   }
 
-th.jtable_filter{
+th.jrptable_filter{
     background-color: white;
     position: sticky;
     table-layout: fixed;

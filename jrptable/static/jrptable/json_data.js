@@ -20,7 +20,7 @@ for(let i =0; i < 20000; i ++){
         "carer": carer
          });
 };
-alert('created data!')
+console.log('created data!')
 
 
 

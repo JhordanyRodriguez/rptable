@@ -3,3 +3,5 @@ db.sqlite3
 jtable_demo/__pycache__/*
 jtable/__pycache__/*
 jtable/migrations/__pycache__/*
+jrptable-demo/__pycache__/*
+jrptable/__pycache__/*
