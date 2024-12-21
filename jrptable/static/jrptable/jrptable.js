@@ -88,7 +88,7 @@ let JrpTable = class{
                                                                                         "name": x,
                                                                                         "type":"string"};
                                                                                     });
-        let reduced_data = this.data.splice(0,500);                                                                           
+        let reduced_data = this.data.slice(0,600);                                                                           
         for (let c =0; c < this.column_names.length; c ++){
             let this_column = this.column_names[c];
             let no_number = reduced_data.findIndex((x)=> isNaN(parseFloat(x[this_column])));
@@ -139,6 +139,7 @@ let JrpTable = class{
      * of the data point we want to create the html row for
      */
     create_data_row(index_in_data){
+        // where are we inserting it
         let data_row = this.tbody.insertRow();
         for (let f =0; f < this.column_names.length; f++)
         {

@@ -17,7 +17,8 @@ for(let i =0; i < 20000; i ++){
     reserve_animals.push({"id": i,
         "animal": animal,
         "gender": gender,
-        "carer": carer
+        "carer": carer,
+        "origin": origin
          });
 };
 console.log('created data!')

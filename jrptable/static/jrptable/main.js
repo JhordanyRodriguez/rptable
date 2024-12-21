@@ -1,4 +1,5 @@
 var my_table = new JrpTable("table_container", "jtt");
+my_table.rows_per_page = 10;
 my_table.set_data(reserve_animals);
 console.log('set data!')
 my_table.create_headers();

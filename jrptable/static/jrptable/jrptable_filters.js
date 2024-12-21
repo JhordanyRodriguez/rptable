@@ -111,30 +111,50 @@ function filter_action(my_table, target, current_runs)
         let total_shown = 0;
         for (let i = 0; i < my_table.html_mirror.length; i ++)
         {
-            let displayed_before = my_table.html_mirror[i].display;
-            // set to true if no filter has status set to false.
-            my_table.html_mirror[i].display = my_table.html_mirror[i].filter_status.find((x)=> x['status']== false)== undefined;
-            if (displayed_before == false && my_table.html_mirror[i].display == true)
-            {
-                to_make_visible.push(i);
+            let new_display = my_table.html_mirror[i].filter_status.find((x)=> x['status']== false)== undefined;
+            let displayed_before = my_table.html_mirror[i].display==true;
+            //my_table.html_mirror[i].display =new_display;
+            if (total_shown <= my_table.rows_per_page)
+            {    
+                // set to true if no filter has status set to false.
+                if (displayed_before == false && new_display == true)
+                {
+                    my_table.html_mirror[i].display= true;
+                    to_make_visible.push(i);
+                    total_shown+=1;
+                }
+                // was visible and remains visible
+                if (displayed_before == true && new_display)
+                {
+                    total_shown +=1;
+                }
             }
             // was visible before and now has to be set to not visible
-            if (my_table.html_mirror[i].row != undefined && my_table.html_mirror[i].display == false)
+            if (displayed_before == true && new_display == false)
             {
+                    my_table.html_mirror[i].display = false;
+                    my_table.html_mirror[i].row.style.display = 'none';
+            }
+            // was visible and should remain visible, but there are already the maximum number of rows visible    
+            if (displayed_before == true && new_display == true && total_shown >= my_table.rows_per_page)
+            {
+                my_table.html_mirror[i].display = false;
                 my_table.html_mirror[i].row.style.display = 'none';
             }
-
         }
-        // how many are visible? 
-
+    
         // make visible again
         for (let i =0;i< to_make_visible.length; i ++)
         {
-            try{
-                if (my_table.html_mirror[to_make_visible[i]].row != undefined)
+            try
+            {
+                if (my_table.html_mirror[to_make_visible[i]].row == undefined)
                 {
-                    my_table.html_mirror[to_make_visible[i]].row.style.display = "table-row";
-                }
+                    // need to create the data row
+                    my_table.html_mirror[to_make_visible[i]].row = my_table.create_data_row(to_make_visible[i])
+                } 
+                my_table.html_mirror[to_make_visible[i]].row.style.display = "table-row";
+                // the entry on html_mirror was set to true earlier
             }
             catch(err){
                 console.log(err);
