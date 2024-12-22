@@ -10,6 +10,6 @@ set_filter_top();
 console.log('set filter top!');
 my_table.fill_data();
 console.log('filled data!');
-my_table.create_sorters()
+create_sorters(my_table);
 console.log ('created sorters!')
 console.log(reserve_animals);

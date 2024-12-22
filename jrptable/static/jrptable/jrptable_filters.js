@@ -111,7 +111,7 @@ function filter_action(my_table, target, current_runs)
         let total_shown = 0;
         for (let i = 0; i < my_table.html_mirror.length; i ++)
         {
-            let new_display = my_table.html_mirror[i].filter_status.find((x)=> x['status']== false)== undefined;
+            let new_display = my_table.html_mirror[i].passes_filters();
             let displayed_before = my_table.html_mirror[i].display==true;
             //my_table.html_mirror[i].display =new_display;
             if (total_shown <= my_table.rows_per_page)
@@ -132,14 +132,12 @@ function filter_action(my_table, target, current_runs)
             // was visible before and now has to be set to not visible
             if (displayed_before == true && new_display == false)
             {
-                    my_table.html_mirror[i].display = false;
-                    my_table.html_mirror[i].row.style.display = 'none';
+                    my_table.html_mirror[i].make_invisible();
             }
             // was visible and should remain visible, but there are already the maximum number of rows visible    
             if (displayed_before == true && new_display == true && total_shown >= my_table.rows_per_page)
             {
-                my_table.html_mirror[i].display = false;
-                my_table.html_mirror[i].row.style.display = 'none';
+                my_table.html_mirror[i].make_invisible();
             }
         }
     
@@ -148,70 +146,9 @@ function filter_action(my_table, target, current_runs)
         
         target.setAttribute("current_runs",0);
         
-        /*
-        let original_states = Array.apply(null,
-                                          Array(my_table.data.length)).map(function(x,i)
-                                          {return my_table.html_mirror[i].display});
-        
-        // the ith entry will be True if the ith data element passes all the other filters.
-        // we do this to prevent rows passing the current test but that fail another filter from
-        // becoming visible again                                 
-        let other_filters = Array.apply(null, Array(my_table.data.length)).map(function(v,i)
-                                {
-                                  const active_filter = my_table.html_mirror[i].filter_status.find(x=>x.status == false
-                                                                                                   && x.index != my_column_index)
-                                  return active_filter == undefined
-                                });
-        
-        // those rows which result disagrees with its current state. 
-        let changes_required = Array.apply(original_states,
-                                           Array(my_table.data.length)).map(function(x,i)
-                                           {
-                                               return original_states[i] != pass_result[i]
-                                           });
-        
-       
-        // actual changes to the dom.
-        let false_indices = my_table.indices.filter((x)=> pass_result[x]== false && changes_required[x]==true);
-        // all the entries that this filter caused them to be 0                                   
-        console.log(original_states);
-        for (let i =0; i < false_indices.length; i ++)
-        {
-            my_table.html_mirror[false_indices[i]].row.style.display ="none";
-            my_table.html_mirror[false_indices[i]].display = false;
-            console.log('changing to false');
-        }  
-        // bring back to view previously hidden rows
-        let new_visible = 0;
-        for (let i =0; i < pass_result.length; i ++){
-            if (pass_result[i] == true)
-            {
-                my_table.html_mirror[i].filter_status[my_column_index].status = true;
-
-                if (new_visible <= my_table.rows_per_page)
-                {
-                    // if html_mirror has a null , we need to create the row
-                    // data_row has to be assigned:
-                    if (my_table.html_mirror[i].row == null)
-                    {
-                        my_table.html_mirror[i].row = my_table.create_data_row(i);
-                    }
-
-                    if (other_filters[i]== true)
-                    {
-                        // general display will only be true if the other filters agree
-                        my_table.html_mirror[i].display = true;
-                        my_table.html_mirror[i].row.style.display ="table-row";
-                    }
-                    new_visible = new_visible +1;
-                }
-            }
-        }
-        */
+     
     }
 }
-
-
 
 
 /**

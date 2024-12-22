@@ -25,6 +25,7 @@ let JrpTableData = class{
         // when creating it, if a row is passed, it means that it will be visible.
         this.display = html_row != null ? true: false;
         this.abs_index = abs_index;
+        this.sorting_index = abs_index;
         //filter status will be true if the object passess the filter
         this.filter_status = Array.apply(column_names, Array(column_names.length))
                             .map(function(value, index, column_namesi)
@@ -38,6 +39,16 @@ let JrpTableData = class{
 
     passes_filters(){
         return this.filter_status.findIndex((x)=> x.status==false) == -1;
+    }
+
+    make_invisible(){
+        this.display = false;
+        this.row.style.display = 'none';
+    }
+
+    make_visible(){
+        this.row.style.display = "table-row";
+        this.display = true;
     }
 }
 
@@ -178,16 +189,20 @@ let JrpTable = class{
     change_view(backwards){
         let current_view = this.get_current_view();
         if (current_view.length>0){
-            let last_index = current_view.at(-1).abs_index;
-            let first_index = current_view.at(0).abs_index;
+            let last_index = current_view.at(-1).sorting_index;
+            let first_index = current_view.at(0).sorting_index;
             let next_view = [];
-            if (backwards == false){
+            if (backwards == false)
+            {
                 // this filter could return when the number of this.rows_per_page elements has been reached.
-                next_view = this.html_mirror.filter((x)=> x.abs_index > last_index && (x.passes_filters()==true))
+                next_view = this.html_mirror.filter((x)=> x.sorting_index > last_index && (x.passes_filters()==true));
+                // they could not be sorted....
+                next_view.sort((x,y)=> x.sorting_index- y.sorting_index);
                 next_view = next_view.slice(0, this.rows_per_page);
             }
             else{
-                next_view = this.html_mirror.filter((x)=> x.abs_index < first_index && (x.passes_filters()==true))
+                next_view = this.html_mirror.filter((x)=> x.sorting_index < first_index && (x.passes_filters()==true));
+                next_view.sort((x,y)=> x.sorting_index - y.sorting_index);
                 next_view = next_view.slice(Math.max(next_view.length- this.rows_per_page,0), next_view.length);
             }
             if (next_view.length ==0){
@@ -195,9 +210,10 @@ let JrpTable = class{
                 return;
             }
             for (let v =0; v< current_view.length; v++){
-                current_view[v].display = false;
-                current_view[v].row.style.display = 'none';
+                current_view[v].make_invisible();
             }
+            console.log('next view is');
+            console.log(next_view);
             let to_make_visible = next_view.map((x)=> x.abs_index);
             this.make_indices_visible(to_make_visible);
         }
@@ -237,6 +253,10 @@ let JrpTable = class{
         this.pagination_div.style.top = new_top  +"px";
     }
 
+    /**
+     * 
+     * @param {Array} to_make_visible: list of absolute indices.
+     */
     make_indices_visible(to_make_visible){
         for (let i =0;i< to_make_visible.length; i ++)
         {
@@ -247,8 +267,7 @@ let JrpTable = class{
                     // need to create the data row
                     this.html_mirror[to_make_visible[i]].row = this.create_data_row(to_make_visible[i])
                 } 
-                this.html_mirror[to_make_visible[i]].row.style.display = "table-row";
-                this.html_mirror[to_make_visible[i]].display = true;
+                this.html_mirror[to_make_visible[i]].make_visible();
                 // the entry on html_mirror was set to true earlier
             }
             catch(err){
@@ -264,106 +283,12 @@ let JrpTable = class{
         
         return 0;
     }
-    compare_strings(x,y){
-        //console.log('comparing ');
-        if (x<y){
-            return -1;
-        }
-        else if(x>y){
-            return 1;
-        }
-        else{
-            return 0;
-        }
-    }
 
-  
+   
 
-    obtain_sorter(column_name, column_index)
-    {
-        
-        let column_info = this.columns_info[column_index];
-        console.log('this is the column info ');
-        console.log(column_info);
-        // the indices of the original data to consider
-        let toConsider =Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
-        toConsider = toConsider.filter((i) => this.html_mirror[i].filter_status.find(x=>x.status == false) == undefined);
-        console.log('to consider');
-        console.log(toConsider);
-        let before_ordering = Array.apply(null,
-                                          toConsider.filter(x => x!= undefined))
-
-        let comparing_strings= (x,y)=> this.compare_strings(this.data[x][column_name],
-                                                            this.data[y][column_name]);
-        //this.ordered_indeces.sort((x,y)=> this.comparator_strings(x,y, this));
-        toConsider.sort((x,y)=> comparing_strings(x,y));
-        console.log('this is the new order');
-        console.log(toConsider);
-        console.log('this is the previous ');
-        console.log(before_ordering);
-        let parent_node = my_table.html_mirror[0].row.parentNode;
-        //every time there is a swap, the previous indixes get pushed one down.
-        // e.g if 6 is the first element now, we have 
-        // 6,0,1,2,3 ... the second entry will need to be compared swapped with 0, not 1
-        let n_swaps =0;
-        // only do the elements in the current page. toConsider only has
-        // the ones that passed the filters.
-        let limit = Math.min(toConsider.length, this.rows_per_page);
-        for (let i =0; i < limit; i ++){
-            if (toConsider[i] != toConsider[i-n_swaps] | 4>3)
-            {
-                console.log('will swap  '+ toConsider[i] + ' with '+ before_ordering[i]);
-                if (this.html_mirror[toConsider[i]].row == null){
-                    this.html_mirror[toConsider[i]].row = this.create_data_row(toConsider[i])
-                }
-                parent_node.insertBefore(this.html_mirror[toConsider[i]].row,
-                                         this.html_mirror[before_ordering[i-n_swaps]].row)
-                n_swaps++;
     
-            }
-            
-           // this.html_mirror[i].row.insertBefore()
-        }
-       
-        
-    }
-
-    my_sorter(column_name){
-        alert(' will sort '+ column_name);
-    }
-    
-    
-
-    create_sorters(){
-        let sortable_columns = this.column_names.filter((x)=> x != undefined);
-        for (let i =0; i < sortable_columns.length; i ++)
-        {
-            let icolumn_name = this.column_names[i].replace(' ','_');
-            let _sorter_id = this.name +"__mheader__"+icolumn_name;
-            // this sorted id will need to refer to the newly created header_div
-            let _header = document.getElementById(_sorter_id);
-            if (_header != undefined){
-                console.log('adding click listener to '+ _sorter_id);
-                //_header.addEventListener('click', this.obtain_sorter(icolumn_name));
-                _header.addEventListener('click',
-                                         (e)=> this.obtain_sorter(icolumn_name, i));
-            }
-            else{
-                console.log('could not find header with id '+ _sorter_id);
-            }
-            
-        }
-    }
-
-
     show(){
         this.my_html.display='block';
     }
-
-    add_column_header_listeners(){
-        for(let i =0; i <this.column_names; i ++){
-
-        }
-    }
+  
 };
-
