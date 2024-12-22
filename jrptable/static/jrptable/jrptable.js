@@ -19,10 +19,12 @@ let JrpTableData = class{
      * 
      * @param {html} html_row 
      */
-    constructor(html_row, column_names){
+    constructor(html_row, column_names, abs_index){
         this.row = html_row;
         this.status = 'created';
+        // when creating it, if a row is passed, it means that it will be visible.
         this.display = html_row != null ? true: false;
+        this.abs_index = abs_index;
         //filter status will be true if the object passess the filter
         this.filter_status = Array.apply(column_names, Array(column_names.length))
                             .map(function(value, index, column_namesi)
@@ -34,6 +36,9 @@ let JrpTableData = class{
         
     }
 
+    passes_filters(){
+        return this.filter_status.findIndex((x)=> x.status==false) == -1;
+    }
 }
 
 let JrpTable = class{
@@ -42,7 +47,8 @@ let JrpTable = class{
      * @param {string} html_parent :string the name of the html object the table will be attached to.
      * @param {string} name name
      */
-    constructor(html_parent, name){
+    constructor(html_parent, name)
+    {
         if (parent== undefined){
             alert("could not find the parent to create the table");
             return;
@@ -52,11 +58,12 @@ let JrpTable = class{
             this.parent = document.getElementById(html_parent);
             this.header_div = document.createElement('div');
             this.header_div.style.position = 'fixed';
-            //this.header_div.textContent= 'holaaa';
+            // will have the scroll property
             this.table_container  = document.createElement('div');
+            this.table_container.id = 'rptable_container_'+ name;
             this.table_container.classList.add('jrptable_table_content_div');
-
             this.table_container.style.overflowY= 'scroll';
+            // you can overwrite the rows per page.
             this.rows_per_page =60;
             this.my_html = document.createElement('TABLE');
             this.header_div.my_html = document.createElement('TABLE');
@@ -70,6 +77,19 @@ let JrpTable = class{
             this.header = null;
             this.parent.appendChild(this.header_div);
             this.parent.appendChild(this.table_container);
+            // pagination
+            this.pagination_div = document.createElement('div');
+            this.pagination_div.classList.add('rptable_pag_div');
+            let pag_button_left = document.createElement('button');
+            this.pagination_div.appendChild(pag_button_left);
+            let pag_button_right = document.createElement('button');
+            this.pagination_div.appendChild(pag_button_right);
+            pag_button_left.textContent = "<-"
+            pag_button_right.textContent = "->"
+            pag_button_left.addEventListener('click', ()=>this.change_view(true));
+            pag_button_right.addEventListener('click', ()=>this.change_view(false));
+
+            this.parent.appendChild(this.pagination_div);
         }
         this.name = name;
         
@@ -150,7 +170,38 @@ let JrpTable = class{
         return data_row;
     }
 
-   
+    get_current_view(){
+        //return this.html_mirror.filter((x)=> x.is_visible() == true);
+        return this.html_mirror.filter((x)=> x.display == true)
+    }
+
+    change_view(backwards){
+        let current_view = this.get_current_view();
+        if (current_view.length>0){
+            let last_index = current_view.at(-1).abs_index;
+            let first_index = current_view.at(0).abs_index;
+            let next_view = [];
+            if (backwards == false){
+                // this filter could return when the number of this.rows_per_page elements has been reached.
+                next_view = this.html_mirror.filter((x)=> x.abs_index > last_index && (x.passes_filters()==true))
+                next_view = next_view.slice(0, this.rows_per_page);
+            }
+            else{
+                next_view = this.html_mirror.filter((x)=> x.abs_index < first_index && (x.passes_filters()==true))
+                next_view = next_view.slice(Math.max(next_view.length- this.rows_per_page,0), next_view.length);
+            }
+            if (next_view.length ==0){
+                alert('there is no more data');
+                return;
+            }
+            for (let v =0; v< current_view.length; v++){
+                current_view[v].display = false;
+                current_view[v].row.style.display = 'none';
+            }
+            let to_make_visible = next_view.map((x)=> x.abs_index);
+            this.make_indices_visible(to_make_visible);
+        }
+    }
     /**
      * It also creates attribute 'html_mirror'. Entry ith in html_mirror holds the 
      * html data corresponding to the ith entry in the original data. i.e, we have
@@ -172,10 +223,40 @@ let JrpTable = class{
                 data_row = this.create_data_row(i);
             }
             // rows that will not be shown, data_row, will be set to null
-            this.html_mirror[i] = new JrpTableData(data_row, this.column_names); 
+            this.html_mirror[i] = new JrpTableData(data_row, this.column_names,i); 
         }
         
         this.my_top = my_table.my_html.getBoundingClientRect().top;
+        setTimeout((x)=> this.re_adjust(), 200);
+        window.addEventListener('resize', (x)=> this.re_adjust());
+    }
+
+    re_adjust(){
+        console.log(this);
+        let new_top = this.parent.getBoundingClientRect().bottom +20;
+        this.pagination_div.style.top = new_top  +"px";
+    }
+
+    make_indices_visible(to_make_visible){
+        for (let i =0;i< to_make_visible.length; i ++)
+        {
+            try
+            {
+                if (this.html_mirror[to_make_visible[i]].row == undefined)
+                {
+                    // need to create the data row
+                    this.html_mirror[to_make_visible[i]].row = this.create_data_row(to_make_visible[i])
+                } 
+                this.html_mirror[to_make_visible[i]].row.style.display = "table-row";
+                this.html_mirror[to_make_visible[i]].display = true;
+                // the entry on html_mirror was set to true earlier
+            }
+            catch(err){
+                console.log(err);
+                console.log(to_make_visible[i]);
+                break;
+            }
+        }
     }
 
     comparator_stringss(x,y, myta){
@@ -273,7 +354,6 @@ let JrpTable = class{
             
         }
     }
-
 
 
     show(){

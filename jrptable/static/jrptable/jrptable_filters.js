@@ -144,24 +144,8 @@ function filter_action(my_table, target, current_runs)
         }
     
         // make visible again
-        for (let i =0;i< to_make_visible.length; i ++)
-        {
-            try
-            {
-                if (my_table.html_mirror[to_make_visible[i]].row == undefined)
-                {
-                    // need to create the data row
-                    my_table.html_mirror[to_make_visible[i]].row = my_table.create_data_row(to_make_visible[i])
-                } 
-                my_table.html_mirror[to_make_visible[i]].row.style.display = "table-row";
-                // the entry on html_mirror was set to true earlier
-            }
-            catch(err){
-                console.log(err);
-                console.log(to_make_visible[i]);
-                break;
-            }
-        }
+        my_table.make_indices_visible(to_make_visible);
+        
         target.setAttribute("current_runs",0);
         
         /*

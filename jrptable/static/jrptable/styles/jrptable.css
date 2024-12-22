@@ -8,6 +8,21 @@
     border-width: 0ch;
 }
 
+.rptable_pag_button{
+    color: blue;
+    font-weight: 100;
+}
+
+.rptable_pag_div{
+    background-color: blue;
+    transform: translateY(-100%);
+    margin-top: 2px;
+    position: fixed;
+    width: 98%;
+    text-align: center;
+
+}
+
 tbody td{
     border: solid;
     border-color: lightgray;
