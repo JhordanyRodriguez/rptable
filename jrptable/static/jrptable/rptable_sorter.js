@@ -14,6 +14,79 @@ function compare_strings(x,y){
 }
 let comparing_strings_from_indices = (data,col,i,j)=> compare_strings(data[i][col],
                                                                       data[j][col]);
+
+/**
+ * Moves the html elements on view based on the sorting_index of each data element.
+ * @param {RpTable} rp_table 
+ */
+function sort_html_elements_in_view(rp_table)
+{
+    let current_view = rp_table.get_current_view();
+    current_view.sort((x,y)=> x.sorting_index - y.sorting_index);
+    let current_view_idx = current_view.map((x)=> x.abs_index);
+    let built_rows = document.getElementsByClassName('rptable_row');
+    built_rows = Array.apply((x)=>x, built_rows);
+    let visible_rows = built_rows.filter((x)=> current_view_idx.includes(parseInt(x.getAttribute('dindex'))));
+    let current_view_html_ordering = Array.apply(null, visible_rows).map((x)=> parseInt(x.getAttribute('dindex')));
+    let current_view_ideal_ordering = current_view.map((x)=> x.abs_index);
+
+    //return visible_rows;
+    let parent_node = visible_rows[0].parentNode;
+    if (current_view_html_ordering.length != current_view_ideal_ordering.length){
+        alert('lists do not coincide in length');
+        return;
+    }
+    // the position in the current vector that will be swapped.
+    let change_happened = -1;
+    let ideals_moved = [];
+    for (let i =0; i < current_view_html_ordering.length; i ++)
+    {
+        if (change_happened == -1 && (current_view_html_ordering[i] != current_view_ideal_ordering[i]))
+        {
+            change_happened = i;
+            /*
+            console.log('current');
+            console.log(current_view_html_ordering);
+            console.log('ideal');
+            console.log(current_view_ideal_ordering);
+            console.log('putting ' +  current_view_ideal_ordering[i] + ' before '+ current_view_html_ordering[i] );
+            */
+            parent_node.insertBefore(rp_table.html_mirror[current_view_ideal_ordering[i]].row,
+                                     rp_table.html_mirror[current_view_html_ordering[i]].row);
+            for (let j=0; j <= i;j++){
+                ideals_moved.push(current_view_ideal_ordering[j]);
+            }
+            continue;
+        }
+        // a movement occurred
+        if (change_happened !=-1)
+        {
+            // if swapping already started, we keep moving items before the given number
+            // unless this new number is the same as the one in the current position
+            if (current_view_html_ordering[change_happened] == current_view_ideal_ordering[i])
+            {
+                ideals_moved.push(current_view_ideal_ordering[i]);
+                console.log('i is '+ i);
+                console.log('just pushing '+ current_view_ideal_ordering[i]);
+                console.log('old change_happened '+ current_view_html_ordering[change_happened]+ 'in '+ change_happened);
+                change_happened = current_view_html_ordering.findIndex((x)=> ideals_moved.includes(x)== false);
+                console.log('New change_happened '+ current_view_html_ordering[change_happened] + 'in '+ change_happened)
+            }
+            else
+            {
+                // we will search the first not moved 
+                let fnm = current_view_html_ordering.findIndex((x)=> ideals_moved.includes(x)== false);
+                change_happened = fnm;
+                //console.log('the first not moved element is index '+ fnm + ' with '+ current_view_html_ordering[fnm]);
+                //console.log('moving ' + current_view_ideal_ordering[i] + ' above ' +current_view_html_ordering[change_happened])
+                parent_node.insertBefore(rp_table.html_mirror[current_view_ideal_ordering[i]].row,
+                                         rp_table.html_mirror[current_view_html_ordering[change_happened]].row);
+                ideals_moved.push(current_view_ideal_ordering[i]);
+            }  
+        }
+    } // end for checking matches
+}
+
 /**
  * 
  * @param {JrpTable} rptable 
@@ -40,16 +113,12 @@ function sort_rptable(rptable, column_name, column_index){
         need_to_go[i].make_invisible();
     }
     rptable.make_indices_visible(to_surface);
-    
-    for (let i =0; i < to_surface; i ++){
-        if (rptable.html_mirror[current_passing_indices[0]].row == null){
-
-        }
-    }
+    sort_html_elements_in_view(rptable);
     return current_passing_indices;
 
 
 }
+
 /**
  * 
  * @param {RpTable} rptable 
@@ -103,6 +172,8 @@ function sort_rptable_old(rptable, column_name, column_index)
 }
 
 
+
+
 function create_sorters(rp_table)
 {
     let sortable_columns = rp_table.column_names.filter((x)=> x != undefined);
@@ -123,11 +194,12 @@ function create_sorters(rp_table)
             console.log('could not find header with id '+ _sorter_id);
         }
     }
+    rp_table.on_changeview_function = sort_html_elements_in_view;
 }
 
 
 
-add_column_header_listeners()
+function add_column_header_listeners()
 {
     for(let i =0; i <rp_table.column_names; i ++){
 

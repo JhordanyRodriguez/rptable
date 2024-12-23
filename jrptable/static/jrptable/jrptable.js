@@ -99,10 +99,10 @@ let JrpTable = class{
             pag_button_right.textContent = "->"
             pag_button_left.addEventListener('click', ()=>this.change_view(true));
             pag_button_right.addEventListener('click', ()=>this.change_view(false));
-
             this.parent.appendChild(this.pagination_div);
         }
         this.name = name;
+        this.on_changeview_function = (x)=> console.log('Replace this function, it sends the table as a param');
         
     };
 
@@ -178,6 +178,7 @@ let JrpTable = class{
             td.innerHTML = this.data[index_in_data][this.column_names[f]];                
         }
         data_row.setAttribute('dindex', index_in_data);
+        data_row.classList.add('rptable_row');
         return data_row;
     }
 
@@ -216,6 +217,8 @@ let JrpTable = class{
             console.log(next_view);
             let to_make_visible = next_view.map((x)=> x.abs_index);
             this.make_indices_visible(to_make_visible);
+            this.on_changeview_function(this);
+            //? should we do the html swapping here?
         }
     }
     /**
