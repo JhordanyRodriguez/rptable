@@ -89,7 +89,7 @@ function sort_html_elements_in_view(rp_table)
 
 /**
  * 
- * @param {JrpTable} rptable 
+ * @param {RpTable} rptable 
  * @param {*} column_name 
  * @param {*} column_index 
  * @returns 

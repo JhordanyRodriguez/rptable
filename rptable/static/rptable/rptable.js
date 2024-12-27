@@ -72,7 +72,7 @@ let RPTable = class{
             // will have the scroll property
             this.table_container  = document.createElement('div');
             this.table_container.id = 'rptable_container_'+ name;
-            this.table_container.classList.add('jrptable_table_content_div');
+            this.table_container.classList.add('rptable_table_content_div');
             this.table_container.style.overflowY= 'scroll';
             // you can overwrite the rows per page.
             this.rows_per_page =60;
@@ -83,8 +83,8 @@ let RPTable = class{
             this.table_container.appendChild(this.my_html);
             this.my_html.id = 0;
             this.columns_info = [];
-            this.my_html.classList.add('jrptable_table');
-            this.header_div.my_html.classList.add('jrptable_table');
+            this.my_html.classList.add('rptable_table');
+            this.header_div.my_html.classList.add('rptable_table');
             this.header = null;
             this.parent.appendChild(this.header_div);
             this.parent.appendChild(this.table_container);
@@ -100,10 +100,13 @@ let RPTable = class{
             pag_button_left.addEventListener('click', ()=>this.change_view(true));
             pag_button_right.addEventListener('click', ()=>this.change_view(false));
             this.parent.appendChild(this.pagination_div);
+
         }
         this.name = name;
+        // function called after the view of the table is changed (due to sorting or scrolling)
         this.on_changeview_function = (x)=> console.log('Replace this function, it sends the table as a param');
-        
+        // function called after content is changed (e.g., due to filtering)
+        this.onContentChangedCallBacks = [(x) => console.log('Replace this function, it should receive the table as a parameter.')];
     };
 
     /**
@@ -148,14 +151,15 @@ let RPTable = class{
         console.log(this.column_names);
         this.header = this.my_html.createTHead();
         
-        this.header_div.classList.add('jrptable_header_mirror');
+        this.header_div.classList.add('rptable_header_mirror');
         let header_row = this.header.insertRow(0);
         let column_width = 100/this.column_names.length;
         
         for (let i =0; i < this.column_names.length; i ++){
             var th = document.createElement('th');
-            th.classList.add('jrptable_header');
-            th.innerHTML = this.column_names[i];            
+            //th.classList.add('rptable_header');
+            th.textContent = this.column_names[i];
+            //th.innerHTML = this.column_names[i];            
             //let td = header_row.insertCell();
             th.id = this.name +"__header__"+this.column_names[i];
             header_row.appendChild(th);
@@ -246,12 +250,12 @@ let RPTable = class{
         }
         
         this.my_top = my_table.my_html.getBoundingClientRect().top;
-        setTimeout((x)=> this.re_adjust(), 200);
+        setTimeout((x)=> this.re_adjust(), 100);
         window.addEventListener('resize', (x)=> this.re_adjust());
     }
 
     re_adjust(){
-        console.log(this);
+        
         let new_top = this.parent.getBoundingClientRect().bottom +20;
         this.pagination_div.style.top = new_top  +"px";
     }

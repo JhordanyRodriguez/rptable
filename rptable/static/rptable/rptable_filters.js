@@ -6,11 +6,12 @@ let myfunctions =[(x,y)=> x>=y
                 ,(x,y)=> x>y
                 ,(x,y)=> x==y
                 ,(x,y)=> x!=y];
+const inQuotesRegex = new RegExp("\".+\"");
 
 
 /**
  * 
- * @param {JrpTable} my_table 
+ * @param {RPTable} my_table 
  * @param {String} filter_value 
  * @param {String} column
  */
@@ -49,7 +50,7 @@ function apply_numeric_filter(my_table, filter_value, column){
 
 
 /**
- * @param {JrpTable} my_table
+ * @param {RPTable} my_table
  * @param {int} timeout 
  * @param {function} event_handler (target, current run)
  * @returns 
@@ -74,7 +75,7 @@ function get_edit_listener_filters(my_table, timeout, event_handler){
 
 /**
      * This function gets called when a filter box is being  edited.
-     * @param {JrpTable} my_table 
+     * @param {RPTable} my_table 
      * @param {HTMLElement} target 
      * @param {int} current_runs used to detect whether the user kept typing
      */
@@ -96,6 +97,12 @@ function filter_action(my_table, target, current_runs)
         if (my_table.columns_info[my_column_index].type == "number")
         {
             pass_result = apply_numeric_filter(my_table, filter_value, column);
+        }
+        else if (filter_value[0]=='"' && filter_value.at(-1)=='"')
+        {
+            let newFilterValue = filter_value.slice(1,-1);
+            console.log('new filter value '+ newFilterValue);
+            pass_result  = my_table.data.map((x)=> x[column] == newFilterValue);
         }
         else
         {
@@ -143,9 +150,10 @@ function filter_action(my_table, target, current_runs)
     
         // make visible again
         my_table.make_indices_visible(to_make_visible);
-        
         target.setAttribute("current_runs",0);
-        
+        for (let cc =0; cc < my_table.onContentChangedCallBacks.length; cc++){
+            my_table.onContentChangedCallBacks[cc](my_table);
+        }
      
     }
 }
@@ -153,7 +161,7 @@ function filter_action(my_table, target, current_runs)
 
 /**
  * main function
- * @param {JrpTable} jrptable 
+ * @param {RPTable} jrptable 
  */
 function create_filters(jrptable){
      // we first create the cells
@@ -162,7 +170,7 @@ function create_filters(jrptable){
         let column_width = 100/jrptable.column_names.length;
         for (let i =0; i < jrptable.column_names.length; i ++){
             let mth = document.createElement('th');
-            mth.classList.add('jrptable_header');
+            mth.classList.add('rptable_header');
             mth.innerHTML = jrptable.column_names[i];            
             mth.id = jrptable.name +"__mheader__"+jrptable.column_names[i];
             mth.style.width = column_width +'%';
@@ -174,8 +182,8 @@ function create_filters(jrptable){
         for (let i =0; i < columns_to_filter.length; i ++)
         {
             var th = document.createElement('th');
-            th.classList.add('jrptable_filter');
-            th.id = 'jrptable_filter__'+columns_to_filter[i].replace(' ','_');
+            th.classList.add('rptable_filter');
+            th.id = 'rptable_filter__'+columns_to_filter[i].replace(' ','_');
             jrptable.filter_row.appendChild(th);
         }
         for (let i =0; i< jrptable.filter_row.children.length; i++){
@@ -197,7 +205,7 @@ function  set_filter_top()
         // we get the bottom of the headers row
         let isChrome = navigator.userAgent.toLowerCase().indexOf('chrome')>=0;
 
-        let headers = document.getElementsByClassName("jrptable_header");
+        let headers = document.getElementsByClassName("rptable_header");
         if (headers != undefined && headers.length > 0){
             let first_header_bottom = headers[0].getBoundingClientRect().bottom;
             let first_header_top = headers[0].getBoundingClientRect().top;
@@ -205,7 +213,7 @@ function  set_filter_top()
             if (isChrome == false){
                 new_top = new_top*2 +3;
             }
-            let filters = document.getElementsByClassName("jrptable_filter");
+            let filters = document.getElementsByClassName("rptable_filter");
             if (filters != undefined){
                 for (let i=0; i < filters.length; i ++){
                     console.log('adjusting filters lenght '+ first_header_bottom);

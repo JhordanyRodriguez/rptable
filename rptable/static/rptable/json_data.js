@@ -5,7 +5,7 @@ const origins =["Colombia", "Australia", "Mexico", "United Kingdom", "New Zeland
 const carers =["Jose", "Hilda", "Jasmine", "Jhordany","Yesenia"];
 
 reserve_animals = [];
-for(let i =0; i < 20000; i ++){
+for(let i =0; i < 30000; i ++){
     let random_data = Math.round(Math.random()*100);
     let animal = animals[parseInt(random_data % animals.length)];
     random_data = Math.round(Math.random()*100);
@@ -14,11 +14,13 @@ for(let i =0; i < 20000; i ++){
     let origin = origins[parseInt(random_data % origins.length)];
     random_data = Math.round(Math.random()*100);
     let carer = carers[parseInt(random_data% carers.length)];
+    let age = Math.round(Math.random()*100);
     reserve_animals.push({"id": i,
-        "animal": animal,
-        "gender": gender,
-        "carer": carer,
-        "origin": origin
+                          "animal": animal,
+                          "gender": gender,
+                          "carer": carer,
+                          "origin": origin,
+                          "age": age
          });
 };
 console.log('created data!')

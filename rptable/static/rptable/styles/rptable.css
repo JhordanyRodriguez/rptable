@@ -1,8 +1,8 @@
-.jrptable_header{
+.rptable_header{
     background-color: blue;
 }
 
-.jrptable_input{
+.rptable_input{
     width: 100%;
     height: 100%;
     border-width: 0ch;
@@ -36,7 +36,7 @@ tbody td{
     border-radius: 5px;
 }
 
-.jrptable_table{
+.rptable_table{
     table-layout:fixed; 
     width: 98%;
     overflow-y: scroll;
@@ -50,12 +50,12 @@ tbody td{
     height: 60%;
 }
 
-.jrptable_header_mirror{
+.rptable_header_mirror{
     background-color: white;
     z-index: 1;
 }
 
-.jrptable_table_content_div{
+.rptable_table_content_div{
     margin-top: 25px; /* would like to make this dynamic*/
 }
 
@@ -68,7 +68,7 @@ th {
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
   }
 
-th.jrptable_filter{
+th.rptable_filter{
     background-color: white;
     position: sticky;
     table-layout: fixed;

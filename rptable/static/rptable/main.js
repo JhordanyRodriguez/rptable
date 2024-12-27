@@ -13,3 +13,5 @@ console.log('filled data!');
 create_sorters(my_table);
 console.log ('created sorters!')
 console.log(reserve_animals);
+let agg = new RPTableAgg(my_table);
+//agg.aggregate();
