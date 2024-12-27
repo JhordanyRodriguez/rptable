@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'jrptable.apps.JrpTableConfig',
+    'rptable.apps.RPTableConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'jrptable-demo.urls'
+ROOT_URLCONF = 'rptable-demo.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'jrptable-demo.wsgi.application'
+WSGI_APPLICATION = 'rptable-demo.wsgi.application'
 
 
 # Database

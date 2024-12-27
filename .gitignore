@@ -1,7 +1,8 @@
 db.sqlite3
 *.pyc$
-jtable_demo/__pycache__/*
-jtable/__pycache__/*
-jtable/migrations/__pycache__/*
-jrptable-demo/__pycache__/*
-jrptable/__pycache__/*
+rptable_demo/__pycache__/*
+rptable/__pycache__/*
+rptable/migrations/__pycache__/*
+rptable-demo/__pycache__/*
+rptable/__pycache__/*
+

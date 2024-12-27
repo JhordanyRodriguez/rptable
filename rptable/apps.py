@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class JrpTableConfig(AppConfig):
+class RPTableConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'jrptable'
+    name = 'rptable'

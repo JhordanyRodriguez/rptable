@@ -6,5 +6,5 @@ from django.template import loader
 
 
 def index(request):
-    template = loader.get_template('jrptable/index.html')
+    template = loader.get_template('rptable/index.html')
     return HttpResponse(template.render({}, request))

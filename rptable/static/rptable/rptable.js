@@ -14,7 +14,7 @@ function add_input_to_cell(html_cell, classes_to_apply){
     return my_input;
 }
 
-let JrpTableData = class{
+let RPTableData = class{
     /**
      * 
      * @param {html} html_row 
@@ -52,7 +52,7 @@ let JrpTableData = class{
     }
 }
 
-let JrpTable = class{
+let RPTable = class{
     /**
      * Returns a table
      * @param {string} html_parent :string the name of the html object the table will be attached to.
@@ -242,7 +242,7 @@ let JrpTable = class{
                 data_row = this.create_data_row(i);
             }
             // rows that will not be shown, data_row, will be set to null
-            this.html_mirror[i] = new JrpTableData(data_row, this.column_names,i); 
+            this.html_mirror[i] = new RPTableData(data_row, this.column_names,i); 
         }
         
         this.my_top = my_table.my_html.getBoundingClientRect().top;
