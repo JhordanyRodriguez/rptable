@@ -93,6 +93,10 @@ let RPTable = class{
             this.pagination_div.classList.add('rptable_pag_div');
             let pag_button_left = document.createElement('button');
             this.pagination_div.appendChild(pag_button_left);
+            this.pagination_label = document.createElement('label');
+            this.pagination_label.id = 'rptable_paglabel';
+            this.textContent = '1';
+            this.pagination_div.appendChild(this.pagination_label);
             let pag_button_right = document.createElement('button');
             this.pagination_div.appendChild(pag_button_right);
             pag_button_left.textContent = "<-"
@@ -106,7 +110,8 @@ let RPTable = class{
         // function called after the view of the table is changed (due to sorting or scrolling)
         this.on_changeview_function = (x)=> console.log('Replace this function, it sends the table as a param');
         // function called after content is changed (e.g., due to filtering)
-        this.onContentChangedCallBacks = [(x) => console.log('Replace this function, it should receive the table as a parameter.')];
+        let update_pag = ()=> '1/'+ parseInt(this.html_mirror.filter((y)=> y.passes_filters()).length/this.rows_per_page);
+        this.onContentChangedCallBacks = [(x) => this.pagination_label.textContent = update_pag()];
     };
 
     /**
@@ -120,7 +125,8 @@ let RPTable = class{
         this.columns_info = Array.apply(this.column_names, Array(this.column_names.length)).map(function(x,i){
                                                                                 return {"index": i,
                                                                                         "name": x,
-                                                                                        "type":"string"};
+                                                                                        "type":"string",
+                                                                                        "next_sorting":"asc"};
                                                                                     });
         let reduced_data = this.data.slice(0,600);                                                                           
         for (let c =0; c < this.column_names.length; c ++){
@@ -191,23 +197,37 @@ let RPTable = class{
         return this.html_mirror.filter((x)=> x.display == true)
     }
 
+    /**
+     * 
+     * @param {boolean} backwards 
+     * @returns 
+     */
     change_view(backwards){
         let current_view = this.get_current_view();
-        if (current_view.length>0){
+        if (current_view.length>0)
+        {
             let last_index = current_view.at(-1).sorting_index;
             let first_index = current_view.at(0).sorting_index;
             let next_view = [];
+            let passFilters = this.html_mirror.filter((x)=> x.passes_filters() == true);
+            let total_views = parseInt(passFilters.length/ this.rows_per_page)+1;
+            let current_nview = 0;
             if (backwards == false)
             {
                 // this filter could return when the number of this.rows_per_page elements has been reached.
-                next_view = this.html_mirror.filter((x)=> x.sorting_index > last_index && (x.passes_filters()==true));
+                next_view = passFilters.filter((x)=> x.sorting_index > last_index);
                 // they could not be sorted....
                 next_view.sort((x,y)=> x.sorting_index- y.sorting_index);
+                let records_out = passFilters.length - next_view.length;
+                current_nview = parseInt(records_out/ this.rows_per_page)+1;
                 next_view = next_view.slice(0, this.rows_per_page);
             }
-            else{
-                next_view = this.html_mirror.filter((x)=> x.sorting_index < first_index && (x.passes_filters()==true));
+            else
+            {
+                next_view = passFilters.filter((x)=> x.sorting_index < first_index);
                 next_view.sort((x,y)=> x.sorting_index - y.sorting_index);
+                let records_out = next_view.length;
+                current_nview = parseInt(records_out/this.rows_per_page);
                 next_view = next_view.slice(Math.max(next_view.length- this.rows_per_page,0), next_view.length);
             }
             if (next_view.length ==0){
@@ -217,9 +237,13 @@ let RPTable = class{
             for (let v =0; v< current_view.length; v++){
                 current_view[v].make_invisible();
             }
-            console.log('next view is');
-            console.log(next_view);
+            this.pagination_label.textContent = current_nview + '/' + total_views;
+            console.log('first and last indices: '+ first_index + ' and '+ last_index);
+            //console.log('next view is');
+            //console.log(next_view);
             let to_make_visible = next_view.map((x)=> x.abs_index);
+            console.log('to make visible ('+ to_make_visible.length +')');
+            console.log(to_make_visible);
             this.make_indices_visible(to_make_visible);
             this.on_changeview_function(this);
             //? should we do the html swapping here?

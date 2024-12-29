@@ -59,7 +59,7 @@ function sort_html_elements_in_view(rp_table)
             continue;
         }
         // a movement occurred
-        if (change_happened !=-1)
+        if (change_happened != -1)
         {
             // if swapping already started, we keep moving items before the given number
             // unless this new number is the same as the one in the current position
@@ -96,9 +96,27 @@ function sort_html_elements_in_view(rp_table)
  */
 function sort_rptable(rptable, column_name, column_index){
     let pass_filters = rptable.html_mirror.filter((x)=> x.passes_filters());
+    let col_info = rptable.columns_info.filter((x)=> x.name == column_name);
+    if (col_info == null || col_info.length !=1)
+    {
+        console.log(col_info);
+        alert('Do not know which column to sort '+ column_name);
+        return;
+    }
+    col_info = col_info[0];
     // it has to be the absolute, because we are looking into the data.
     let current_passing_indices = pass_filters.map(get_abs_index);
-    current_passing_indices.sort((i,j)=> comparing_strings_from_indices(rptable.data, column_name, i,j));
+    if (col_info.next_sorting == 'none' || col_info.next_sorting == 'asc'){
+        console.log('will ascend');
+        current_passing_indices.sort((i,j)=> comparing_strings_from_indices(rptable.data, column_name, i,j));
+        col_info.next_sorting = 'desc';
+    }
+    else
+    {
+        console.log('will descend');
+        current_passing_indices.sort((i,j)=> comparing_strings_from_indices(rptable.data, column_name, j,i));
+        col_info.next_sorting = 'asc'
+    }
     // update the sorting indices
     for (let i =0; i < current_passing_indices.length; i ++){
         rptable.html_mirror[current_passing_indices[i]].sorting_index =i;
@@ -107,7 +125,11 @@ function sort_rptable(rptable, column_name, column_index){
     // make the html rows visible if necessary
     let to_surface_n = Math.min(rptable.rows_per_page, current_passing_indices.length);
     let to_surface = current_passing_indices.slice(0, to_surface_n);
-    let need_to_go = rptable.html_mirror.filter((x)=> x.display == true && to_surface.includes(x.sorting_index)== false);
+    console.log('to surface')
+    console.log(to_surface);
+    let need_to_go = rptable.html_mirror.filter((x)=> x.display == true && to_surface.includes(x.abs_index)== false);
+    console.log('need to go '+ need_to_go.length);
+    console.log(need_to_go);
     for (let i =0; i < need_to_go.length; i ++)
     {
         need_to_go[i].make_invisible();

@@ -85,3 +85,8 @@ th.rptable_filter{
 #fixed_divss{
     position: fixed;
 }
+
+#rptable_paglabel{
+    font: white;
+    color: white;
+}

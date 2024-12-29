@@ -108,7 +108,7 @@ function filter_action(my_table, target, current_runs)
         {
             pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);
         }
-                                        
+        // update the general filter function call.                               
         for (let i =0; i < pass_result.length; i ++)
         {
             my_table.html_mirror[i].filter_status[my_column_index].status = pass_result[i];
@@ -121,7 +121,7 @@ function filter_action(my_table, target, current_runs)
             let new_display = my_table.html_mirror[i].passes_filters();
             let displayed_before = my_table.html_mirror[i].display==true;
             //my_table.html_mirror[i].display =new_display;
-            if (total_shown <= my_table.rows_per_page)
+            if (total_shown < my_table.rows_per_page)
             {    
                 // set to true if no filter has status set to false.
                 if (displayed_before == false && new_display == true)
@@ -151,10 +151,12 @@ function filter_action(my_table, target, current_runs)
         // make visible again
         my_table.make_indices_visible(to_make_visible);
         target.setAttribute("current_runs",0);
-        for (let cc =0; cc < my_table.onContentChangedCallBacks.length; cc++){
+        // call functions after content change. If the sorting module has added a
+        // callback funcition, it will be called here.
+        for (let cc =0; cc < my_table.onContentChangedCallBacks.length; cc++)
+        {
             my_table.onContentChangedCallBacks[cc](my_table);
         }
-     
     }
 }
 
