@@ -57,8 +57,9 @@ let RPTable = class{
      * Returns a table
      * @param {string} html_parent :string the name of the html object the table will be attached to.
      * @param {string} name name
+     * @param {list(stirng)} unique_ids list of columns which values uniquely identify an object 
      */
-    constructor(html_parent, name)
+    constructor(html_parent, name, unique_ids)
     {
         if (parent== undefined){
             alert("could not find the parent to create the table");
@@ -69,13 +70,14 @@ let RPTable = class{
             this.parent = document.getElementById(html_parent);
             this.header_div = document.createElement('div');
             this.header_div.style.position = 'fixed';
+            this.unique_ids = unique_ids;
             // will have the scroll property
             this.table_container  = document.createElement('div');
             this.table_container.id = 'rptable_container_'+ name;
             this.table_container.classList.add('rptable_table_content_div');
             this.table_container.style.overflowY= 'scroll';
             // you can overwrite the rows per page.
-            this.rows_per_page =60;
+            this.rows_per_page =10;
             this.my_html = document.createElement('TABLE');
             this.header_div.my_html = document.createElement('TABLE');
             this.header_div.my_html.setAttribute('table-layout','fixed');
@@ -185,7 +187,10 @@ let RPTable = class{
         for (let f =0; f < this.column_names.length; f++)
         {
             let td = data_row.insertCell();
-            td.innerHTML = this.data[index_in_data][this.column_names[f]];                
+            td.textContent = this.data[index_in_data][this.column_names[f]];
+            td.id = 'rptable_'+ this.name+'_at_'+index_in_data+'_for_'+ this.column_names[f].replaceAll(' ', '_');
+            td.setAttribute('colID', f);
+            //td.setAttribute('row_idx', index_in_data);       
         }
         data_row.setAttribute('dindex', index_in_data);
         data_row.classList.add('rptable_row');
