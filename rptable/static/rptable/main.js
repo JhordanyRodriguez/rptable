@@ -28,8 +28,8 @@ function tableEdited(rowID, unIDs, column,newValue, oldValue, object){
 
 function create_graph(rptable){
     let theDiv = document.getElementById('canvas_div');
-    let graph = new RPgraph(rptable, theDiv);
-    graph.createNewChart('carer');
+    graph = new RPgraph(rptable, theDiv);
+    graph.createNewChart(graph.horizontalProperty);
 }
 
 let rpEditor = new RPEditor(my_table, tableEdited);

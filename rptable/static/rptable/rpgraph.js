@@ -28,10 +28,12 @@ let RPgraph = class {
     }
   }
 
+  /**
+   * Event executed when the refresh button is clicked.
+   */
   refreshNewSettings()
   {
-    let hv = this.horizontalSelect.value;
-    this.horizontalProperty= this.rptable.columns_info[hv].name;
+    
     this.update_event();
   }
   /**
@@ -45,6 +47,9 @@ let RPgraph = class {
     this.parentDiv = parentDiv;
     this.horizontalProperty ='carer';
     this.parentDiv.classList.add('row');
+    this.operations =[{"value": 0, "textContent":"count"},
+                      {"value": 1, "textContent":"sum"},
+                      {"value": 2, "textContent":"mean"}]
     this.left_column = document.createElement('div');
     this.left_column.classList.add('rpgraphColumn');
     this.left_column.classList.add('column');
@@ -73,19 +78,16 @@ let RPgraph = class {
 
     let operationLabel = document.createElement('label');
     operationLabel.textContent = 'Operation in Y';
-    let operationSelect = document.createElement('select');
-    let operations =[{"value": 0, "textContent":"count"},
-                      {"value": 1, "textContent":"sum"},
-                      {"value": 2, "textContent":"mean"}]
-    for (let i =0; i < operations.length; i ++){
+    this.operationSelect = document.createElement('select');
+    for (let i =0; i < this.operations.length; i ++){
       let op = document.createElement('option');
-      op.textContent = operations[i]['textContent'];
-      op.value = operations[i]['value'];
-      operationSelect.options.add(op);
+      op.textContent = this.operations[i]['textContent'];
+      op.value = this.operations[i]['value'];
+      this.operationSelect.options.add(op);
     }
     this.right_column.appendChild(document.createElement('br'));
     this.right_column.appendChild(operationLabel);
-    this.right_column.appendChild(operationSelect);
+    this.right_column.appendChild(this.operationSelect);
     let setGraphButton = document.createElement('button');
     setGraphButton.textContent = 'refresh';
     setGraphButton.addEventListener('click', ()=> this.refreshNewSettings())
@@ -93,19 +95,40 @@ let RPgraph = class {
     
     this.parentDiv.appendChild(this.right_column);
 
-
     this.rptable.onContentChangedCallBacks.push(()=> this.update_event());
   }
 
-  update_event(){
-    let labelsData = this.get_basic_count(this.horizontalProperty);
-    this.update_chart(labelsData);
+  /**
+   * Event linked to the content change trigger.
+   */
+  update_event()
+  {
+    let hv = this.horizontalSelect.value;
+    this.horizontalProperty= this.rptable.columns_info[hv].name;
+    let vp = this.verticalSelect.value;
+    this.verticalProperty = this.rptable.columns_info[vp].name;
+    this.aggOperation = this.operations[this.operationSelect.value].textContent;
+    if (this.aggOperation == 'count'){
+      let labelsData = this.get_basic_count(this.horizontalProperty);
+      this.update_chart(labelsData);
+    }
+    else if (this.aggOperation == 'sum' || this.aggOperation== "mean")
+    {
+      let labelsData = this.get_aggregations(this.horizontalProperty, this.verticalProperty, this.aggOperation);
+      this.update_chart(labelsData);
+    }
   }
 
+  /**
+   * given the labels and data passed as arguments, and the currently set 
+   * properties (horizontal and vertical), redraws the graph.
+   * @param {JSON} labelsAndData 
+   */
   update_chart(labelsAndData)
   {
     this.myChart.data.labels = labelsAndData["labels"];
     this.myChart.data.datasets[0].data = labelsAndData["data"];
+    this.myChart.data.datasets[0].label = this.horizontalProperty;
     //console.log(labelsAndData["labels"]);
     //console.log(labelsAndData["data"]);
     this.myChart.update();
@@ -114,13 +137,66 @@ let RPgraph = class {
 
   /**
    * 
+   * @param {string} horizontalProp 
+   * @param {string} verticalProp 
+   * @param {string} operation 
+   * @returns 
+   */
+  get_aggregations(horizontalProp, verticalProp, operation){
+    let passFilters = this.rptable.html_mirror.filter((x)=> x.passes_filters() == true);
+    let absIndices = passFilters.map((x)=> x.abs_index);
+    let myLabels = {}
+
+    for (let i=0; i < absIndices.length; i ++)
+    {
+      let propertyValue = this.rptable.data[absIndices[i]][horizontalProp];
+      let verticalValue = this.rptable.data[absIndices[i]][verticalProp]
+      if (myLabels[propertyValue]!= undefined)
+      {
+          myLabels[propertyValue]['sum'] += verticalValue;
+          myLabels[propertyValue]['count'] += 1;
+      }
+      else
+      {
+        myLabels[propertyValue]= {"sum": verticalValue, "count":1};
+      }
+    }
+    console.log(myLabels);
+    console.log(operation);
+    let cats = Object.keys(myLabels);
+
+    if (operation == "mean")
+    {
+      for (let i =0; i < cats.length; i ++)
+      {
+        myLabels[cats[i]]['data']= myLabels[cats[i]]['sum']/myLabels[cats[i]]['count'];
+      }
+    }
+    else if (operation == "sum"){
+      for (let i =0; i < cats.length; i ++){
+        myLabels[cats[i]]['data']= myLabels[cats[i]]['sum'];
+      }
+    }
+
+    let theLabels = Object.keys(myLabels);
+    let toGraph = {"labels": theLabels,
+                   "data": theLabels.map((x)=> myLabels[x]['data'])};
+    console.log(toGraph);
+    return toGraph;
+  }
+
+
+  /**
+   * 
    * @param {string} col 
    */
   get_basic_count(col){
     let passFilters = this.rptable.html_mirror.filter((x)=> x.passes_filters() == true);
     let absIndices = passFilters.map((x)=> x.abs_index);
+    // we use the multiset data structure for fast computation.
     let counts = new Multiset();
-    for (let i=0; i < absIndices.length; i ++){
+    for (let i=0; i < absIndices.length; i ++)
+    {
       counts.add(this.rptable.data[absIndices[i]][col]);
     }
     let labels = [];
