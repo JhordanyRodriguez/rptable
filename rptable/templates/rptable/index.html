@@ -15,16 +15,21 @@
     </div>
     {% load static %}
     <script src={% static 'rptable/json_data.js' %}></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src={% static 'rptable/rptable.js' %}></script>
     <script src={% static 'rptable/rptable_filters.js' %}></script>
     <script src={% static 'rptable/rptable_sorter.js' %}></script>
     <script src={% static 'rptable/rptable_agg.js' %}></script>
     <script src={% static 'rptable/rptable_editor.js' %}></script>
+    <script src={% static 'rptable/rpgraph.js' %}></script>
     <script src={% static 'rptable/main.js' %}></script>
     <link rel="stylesheet" type="text/css" href="{% static 'rptable/styles/rptable.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'rptable/styles/rpgraph.css' %}">
     <!-- <img src="{% static 'my_app/example.jpg' %}" alt="My image"> -->
-    <div id="other_div">
-      hope you enjoyed your visit!
-      </div>
+    
+    <div id="canvas_div">
+      <!-- <canvas id="myChart"></canvas>-->
+    </div>
+    
   </body>
 </html>

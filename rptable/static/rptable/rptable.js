@@ -67,6 +67,8 @@ let RPTable = class{
         } 
         else
         {
+            this.rows_per_page =10;
+            this.bottom_by = 'last row'; // last row or fixed
             this.parent = document.getElementById(html_parent);
             this.header_div = document.createElement('div');
             this.header_div.style.position = 'fixed';
@@ -77,7 +79,6 @@ let RPTable = class{
             this.table_container.classList.add('rptable_table_content_div');
             this.table_container.style.overflowY= 'scroll';
             // you can overwrite the rows per page.
-            this.rows_per_page =10;
             this.my_html = document.createElement('TABLE');
             this.header_div.my_html = document.createElement('TABLE');
             this.header_div.my_html.setAttribute('table-layout','fixed');
@@ -283,10 +284,37 @@ let RPTable = class{
         window.addEventListener('resize', (x)=> this.re_adjust());
     }
 
+    get_last_row_bottom(){
+        let lastVisibleRow = this.html_mirror.filter((x)=> x.display == true);
+        if (lastVisibleRow.length >0){
+            let last = lastVisibleRow.at(-1).row;
+            let theBottom = last.getBoundingClientRect().bottom;
+            return theBottom;
+            //window.dispatchEvent(new Event('resize'));
+        }
+        else{
+            return null;
+        }
+    }
+
+    re_adjust_with_last_row()
+    {
+        let bottom = this.get_last_row_bottom();
+        if (bottom != null){
+            this.pagination_div.style.top = (bottom+20) + 'px';
+        }
+      
+    }
+
     re_adjust(){
-        
-        let new_top = this.parent.getBoundingClientRect().bottom +20;
-        this.pagination_div.style.top = new_top  +"px";
+        if (this.bottom_by == 'last row'){
+            this.re_adjust_with_last_row();
+        }
+        else
+        {
+            let new_top = this.parent.getBoundingClientRect().bottom +20;
+            this.pagination_div.style.top = new_top  +"px";
+        }
     }
 
     /**

@@ -20,7 +20,7 @@ let RPTableAgg = class {
         {
             let agg_td = aggRow.insertCell();
             agg_td.classList.add('rptable_agg_td');
-            agg_td.textContent = '| ';
+            agg_td.style.minHeight = '10px';
             agg_td.id = "input_in__rptable_agg__"+ this.rptable.columns_info[i].name;
 
         }

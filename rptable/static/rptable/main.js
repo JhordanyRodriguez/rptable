@@ -14,6 +14,8 @@ create_sorters(my_table);
 console.log ('created sorters!')
 console.log(reserve_animals);
 let agg = new RPTableAgg(my_table);
+let graph = null;
+
 
 function tableEdited(rowID, unIDs, column,newValue, oldValue, object){
     console.log(rowID);
@@ -24,5 +26,13 @@ function tableEdited(rowID, unIDs, column,newValue, oldValue, object){
     console.log('old value was '+ oldValue);
 }
 
+function create_graph(rptable){
+    let theDiv = document.getElementById('canvas_div');
+    let graph = new RPgraph(rptable, theDiv);
+    graph.createNewChart('carer');
+}
+
 let rpEditor = new RPEditor(my_table, tableEdited);
+
+document.addEventListener('DOMContentLoaded', (e)=> create_graph(my_table));
 //agg.aggregate();
