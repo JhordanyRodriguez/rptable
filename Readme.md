@@ -27,12 +27,12 @@ Only requirement for you to run this project is django (version 5.0.6)
  Most files are boiler plate code required by Django to serve the webpage. The key files
  to understand are:
 
-/*
+
 1. rptable/templates/rptable/index.html: Minimal example of html webpage that calls the necessary scripts and contains some divs
 in which the table and graphs will be held.
 2. rptable/static/rptable/json_data.js: A script that generates some random data.
 3. rptable/static/rptable/main.js: a script that contains default calls to use RPTables.
-*/
+
 
 Enjoy and feel free to propose changes, report bugs and contribute. Simply create a pull request and we will be happy to test and merge your changes.
 
