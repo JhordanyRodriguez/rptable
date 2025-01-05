@@ -1,8 +1,27 @@
+/*
+Copyright (c) 2025 Jhordany Rodriguez Parra.
 
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge, publish, 
+distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following condition:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
+
+/**
+ * A class that helps counting the number of occurrencies for
+ * every category in an array. That is, for ['yellow', 'red', 'blue', 'red']
+ * we get yellow =1, red =2, blue =1 by iterating through the entries.
+ * 
+ */
 class Multiset extends Map {
   constructor(...args) {
       super(...args);
   }
+
   add(elem) {
       if (!this.has(elem))
           this.set(elem, 1);
@@ -12,7 +31,12 @@ class Multiset extends Map {
 }
 
 
-
+/**
+ * Creates a Graph object that interacts with a RPTable.
+ * 
+ * @param {RPTable} rptable 
+ * @param {HTMLElement} parentDiv The div in which the canvas and controls will be located.
+ */
 let RPgraph = class {
 
   /**
@@ -20,10 +44,10 @@ let RPgraph = class {
    * @param {HTMLElement} selectToPopulate 
    */
   populateSelect(selectToPopulate){
-    for (let i =0; i < this.rptable.columns_info.length; i ++){
+    for (let i =0; i < this.rptable.columnsInfo.length; i ++){
       let opt = document.createElement('option');
-      opt.textContent = this.rptable.columns_info[i].name;
-      opt.value = this.rptable.columns_info[i].index;
+      opt.textContent = this.rptable.columnsInfo[i].name;
+      opt.value = this.rptable.columnsInfo[i].index;
       selectToPopulate.options.add(opt);
     }
   }
@@ -33,8 +57,7 @@ let RPgraph = class {
    */
   refreshNewSettings()
   {
-    
-    this.update_event();
+    this.updateEvent();
   }
   /**
    * 
@@ -52,15 +75,15 @@ let RPgraph = class {
                       {"value": 2, "textContent":"mean"}]
     this.left_column = document.createElement('div');
     this.left_column.classList.add('rpgraphColumn');
+    this.left_column.classList.add('left');
     this.left_column.classList.add('column');
-    this.left_column.style.width= "48%";
     this.left_column.style.float= "left";
     this.parentDiv.appendChild(this.left_column);
     this.parentDiv.style.width = "100%";
     this.right_column = document.createElement('div');
     this.right_column.classList.add('rpgraphColumn');
+    this.right_column.classList.add('right');
     this.right_column.classList.add('column');
-    this.right_column.style.width= "48%";
     this.right_column.style.float= "right";
     let horizontalLabel = document.createElement('label');
     horizontalLabel.textContent = "Property for X axis: "
@@ -95,36 +118,42 @@ let RPgraph = class {
     
     this.parentDiv.appendChild(this.right_column);
 
-    this.rptable.onContentChangedCallBacks.push(()=> this.update_event());
+    this.rptable.onContentChangedCallBacks.push(()=> this.updateEvent());
   }
 
   /**
-   * Event linked to the content change trigger.
+   * Event linked to the content change trigger and called by the 'refresh'
+   * button.
    */
-  update_event()
+  updateEvent()
   {
     let hv = this.horizontalSelect.value;
-    this.horizontalProperty= this.rptable.columns_info[hv].name;
+    this.horizontalProperty= this.rptable.columnsInfo[hv].name;
     let vp = this.verticalSelect.value;
-    this.verticalProperty = this.rptable.columns_info[vp].name;
+    this.verticalProperty = this.rptable.columnsInfo[vp].name;
     this.aggOperation = this.operations[this.operationSelect.value].textContent;
+
     if (this.aggOperation == 'count'){
       let labelsData = this.get_basic_count(this.horizontalProperty);
-      this.update_chart(labelsData);
+      this.updateChart(labelsData);
     }
     else if (this.aggOperation == 'sum' || this.aggOperation== "mean")
     {
+      if (this.rptable.columnsInfo[vp].type !="number"){
+        alert('cannot aggregate a non-numerical feature. Change the Y axis property to a numerical feature');
+        return;
+      }
       let labelsData = this.get_aggregations(this.horizontalProperty, this.verticalProperty, this.aggOperation);
-      this.update_chart(labelsData);
+      this.updateChart(labelsData);
     }
   }
 
   /**
-   * given the labels and data passed as arguments, and the currently set 
-   * properties (horizontal and vertical), redraws the graph.
+   * given the labels and data passed redraws the graph.
+   * the current value of this.horizontalProperty will be used as label.
    * @param {JSON} labelsAndData 
    */
-  update_chart(labelsAndData)
+  updateChart(labelsAndData)
   {
     this.myChart.data.labels = labelsAndData["labels"];
     this.myChart.data.datasets[0].data = labelsAndData["data"];
@@ -136,15 +165,17 @@ let RPgraph = class {
   }
 
   /**
-   * 
+   * Aggregates the data for each one of the categories defined by the 
+   * feature (i.e, column) horizontalProp. For each bin, it executes
+   * the operation 'operation' 
    * @param {string} horizontalProp 
    * @param {string} verticalProp 
-   * @param {string} operation 
+   * @param {string} operation a value in ['sum', 'count', 'mean']
    * @returns 
    */
   get_aggregations(horizontalProp, verticalProp, operation){
     let passFilters = this.rptable.html_mirror.filter((x)=> x.passes_filters() == true);
-    let absIndices = passFilters.map((x)=> x.abs_index);
+    let absIndices = passFilters.map((x)=> x.absIndex);
     let myLabels = {}
 
     for (let i=0; i < absIndices.length; i ++)
@@ -187,12 +218,13 @@ let RPgraph = class {
 
 
   /**
-   * 
+   * divides the dataset based on the values of column 'col'. For each category,
+   * it counts the number of occurrencies.
    * @param {string} col 
    */
   get_basic_count(col){
     let passFilters = this.rptable.html_mirror.filter((x)=> x.passes_filters() == true);
-    let absIndices = passFilters.map((x)=> x.abs_index);
+    let absIndices = passFilters.map((x)=> x.absIndex);
     // we use the multiset data structure for fast computation.
     let counts = new Multiset();
     for (let i=0; i < absIndices.length; i ++)
@@ -212,6 +244,12 @@ let RPgraph = class {
     
   }
 
+  /**
+   * Creates a new bar chart where column 'col' is used to create categories.
+   * For each category, we count the occurrencies and use these numbers for the
+   * height of the bars.
+   * @param {string} col 
+   */
   createNewChart(col){
     
     //const ctx = document.getElementById('myChart');
@@ -238,10 +276,11 @@ let RPgraph = class {
       }
     });
     let bottom = this.rptable.get_last_row_bottom();
-    if (bottom != null){
+    if (bottom != null)
+    {
       this.left_column.style.position = 'fixed';
       this.left_column.style.top = (bottom + 50) +'px';
-      this.left_column.style.height = "50%";
+      //this.left_column.style.height = "50%";
       this.parentDiv.style.position = 'fixed';
       this.parentDiv.style.top = (bottom + 50) +'px';
       this.parentDiv.style.height = "50%";

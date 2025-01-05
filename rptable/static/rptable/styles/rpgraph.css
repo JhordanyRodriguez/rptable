@@ -2,6 +2,23 @@
     margin-top: 1%;
     padding: 10px;
     background-color: aliceblue;
-    height: 99%;
-    width: 48%;
+    /* it seems like this is not with respect to the parent element */
+    height: 49%;
+}
+
+.rpgraphColumn.left{
+    width: 68%;
+}
+
+.rpgraphColumn.right{
+    width: 30%;
+}
+
+#myChart{
+    width: 97%;
+    height: 90%;
+}
+
+#canvas_div{
+    height: 50%;
 }

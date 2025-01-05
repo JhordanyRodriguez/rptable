@@ -15,8 +15,10 @@
     </div>
     {% load static %}
     <script src={% static 'rptable/json_data.js' %}></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Original source of the script. For completeness we provide a copy of 
+     chart.js <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
     <script src={% static 'rptable/rptable.js' %}></script>
+    <script src={% static 'chart.js' %}></script>
     <script src={% static 'rptable/rptable_filters.js' %}></script>
     <script src={% static 'rptable/rptable_sorter.js' %}></script>
     <script src={% static 'rptable/rptable_agg.js' %}></script>

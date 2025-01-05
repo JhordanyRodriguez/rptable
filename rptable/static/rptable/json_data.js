@@ -2,7 +2,7 @@
 const animals =["bear", "dog", "cat", "lion", "leopard", "tiger", "owl", "eagle", "puma", "zebra"];
 const genders =["female", "male"];
 const origins =["Colombia", "Australia", "Mexico", "United Kingdom", "New Zeland"];
-const carers =["Jose", "Hilda", "Jasmine", "Jhordany","Yesenia"];
+const carers =["Jose", "Hilda", "Yesenia", "Jhordany","Paco","Lucky","Tobi"];
 
 reserve_animals = [];
 for(let i =0; i < 30000; i ++){

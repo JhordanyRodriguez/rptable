@@ -1,3 +1,17 @@
+
+/*
+Copyright (c) 2025 Jhordany Rodriguez Parra.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge, publish, 
+distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following condition:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
+
 var aglobal ="";
 
 
@@ -44,13 +58,13 @@ let RPEditor = class{
         if (event.target != null && event.target.tagName.toLowerCase() == 'input'){
             let colID = event.target.parentElement.getAttribute('colID');
             let rowID = event.target.parentElement.parentElement.getAttribute('dindex');
-            let column = this.rptable.columns_info[parseInt(colID)].name;
+            let column = this.rptable.columnsInfo[parseInt(colID)].name;
             console.log('editing row '+ rowID+ ' in column '+ colID);
             let oldContent = this.rptable.data[rowID][column];
             this.rptable.data[rowID][column]= event.target.value;
             let unIDs = [];
-            for (let i=0; i < this.rptable.unique_ids.length; i ++){
-                unIDs.push(this.rptable.data[rowID][this.rptable.unique_ids[i]]);
+            for (let i=0; i < this.rptable.uniqueIDs.length; i ++){
+                unIDs.push(this.rptable.data[rowID][this.rptable.uniqueIDs[i]]);
             }
    
             this.editCallBack(rowID, unIDs, column,this.rptable.data[rowID][column], oldContent, this.rptable.data[rowID]);

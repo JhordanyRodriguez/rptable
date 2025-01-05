@@ -1,4 +1,17 @@
-let get_abs_index = (x)=> x.abs_index;
+/*
+Copyright (c) 2025 Jhordany Rodriguez Parra.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge, publish, 
+distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following condition:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
+
+let get_abs_index = (x)=> x.absIndex;
 
 function compare_strings(x,y){
     //console.log('comparing ');
@@ -22,13 +35,13 @@ let comparing_strings_from_indices = (data,col,i,j)=> compare_strings(data[i][co
 function sort_html_elements_in_view(rp_table)
 {
     let current_view = rp_table.get_current_view();
-    current_view.sort((x,y)=> x.sorting_index - y.sorting_index);
-    let current_view_idx = current_view.map((x)=> x.abs_index);
+    current_view.sort((x,y)=> x.sortingIndex - y.sortingIndex);
+    let current_view_idx = current_view.map((x)=> x.absIndex);
     let built_rows = document.getElementsByClassName('rptable_row');
     built_rows = Array.apply((x)=>x, built_rows);
     let visible_rows = built_rows.filter((x)=> current_view_idx.includes(parseInt(x.getAttribute('dindex'))));
     let current_view_html_ordering = Array.apply(null, visible_rows).map((x)=> parseInt(x.getAttribute('dindex')));
-    let current_view_ideal_ordering = current_view.map((x)=> x.abs_index);
+    let current_view_ideal_ordering = current_view.map((x)=> x.absIndex);
 
     //return visible_rows;
     let parent_node = visible_rows[0].parentNode;
@@ -96,7 +109,7 @@ function sort_html_elements_in_view(rp_table)
  */
 function sort_rptable(rptable, column_name, column_index){
     let pass_filters = rptable.html_mirror.filter((x)=> x.passes_filters());
-    let col_info = rptable.columns_info.filter((x)=> x.name == column_name);
+    let col_info = rptable.columnsInfo.filter((x)=> x.name == column_name);
     if (col_info == null || col_info.length !=1)
     {
         console.log(col_info);
@@ -106,28 +119,28 @@ function sort_rptable(rptable, column_name, column_index){
     col_info = col_info[0];
     // it has to be the absolute, because we are looking into the data.
     let current_passing_indices = pass_filters.map(get_abs_index);
-    if (col_info.next_sorting == 'none' || col_info.next_sorting == 'asc'){
+    if (col_info.nextSorting == 'none' || col_info.nextSorting == 'asc'){
         console.log('will ascend');
         current_passing_indices.sort((i,j)=> comparing_strings_from_indices(rptable.data, column_name, i,j));
-        col_info.next_sorting = 'desc';
+        col_info.nextSorting = 'desc';
     }
     else
     {
         console.log('will descend');
         current_passing_indices.sort((i,j)=> comparing_strings_from_indices(rptable.data, column_name, j,i));
-        col_info.next_sorting = 'asc'
+        col_info.nextSorting = 'asc'
     }
     // update the sorting indices
     for (let i =0; i < current_passing_indices.length; i ++){
-        rptable.html_mirror[current_passing_indices[i]].sorting_index =i;
+        rptable.html_mirror[current_passing_indices[i]].sortingIndex =i;
     }
     
     // make the html rows visible if necessary
-    let to_surface_n = Math.min(rptable.rows_per_page, current_passing_indices.length);
+    let to_surface_n = Math.min(rptable.rowsPerPage, current_passing_indices.length);
     let to_surface = current_passing_indices.slice(0, to_surface_n);
     console.log('to surface')
     console.log(to_surface);
-    let need_to_go = rptable.html_mirror.filter((x)=> x.display == true && to_surface.includes(x.abs_index)== false);
+    let need_to_go = rptable.html_mirror.filter((x)=> x.display == true && to_surface.includes(x.absIndex)== false);
     console.log('need to go '+ need_to_go.length);
     console.log(need_to_go);
     for (let i =0; i < need_to_go.length; i ++)
@@ -149,7 +162,7 @@ function sort_rptable(rptable, column_name, column_index){
  */
 function sort_rptable_old(rptable, column_name, column_index)
 {
-    let column_info = rptable.columns_info[column_index];
+    let column_info = rptable.columnsInfo[column_index];
     // the indices of the original data to consider
     let toConsider =Array.apply(null, Array(rptable.data.length)).map(function(x,i){return i;});
     //let toConsider = Array.apply((x)=>x, Array())
@@ -176,13 +189,13 @@ function sort_rptable_old(rptable, column_name, column_index)
     let n_swaps =0;
     // only do the elements in the current page. toConsider only has
     // the ones that passed the filters.
-    let limit = Math.min(toConsider.length, rptable.rows_per_page);
+    let limit = Math.min(toConsider.length, rptable.rowsPerPage);
     for (let i =0; i < limit; i ++){
         if (toConsider[i] != toConsider[i-n_swaps] | 4>3)
         {
             console.log('will swap  '+ toConsider[i] + ' with '+ before_ordering[i]);
             if (rptable.html_mirror[toConsider[i]].row == null){
-                rptable.html_mirror[toConsider[i]].row = rptable.create_data_row(toConsider[i])
+                rptable.html_mirror[toConsider[i]].row = rptable.createDataRow(toConsider[i])
             }
             parent_node.insertBefore(rptable.html_mirror[toConsider[i]].row,
                                     rptable.html_mirror[before_ordering[i-n_swaps]].row)
@@ -198,10 +211,10 @@ function sort_rptable_old(rptable, column_name, column_index)
 
 function create_sorters(rp_table)
 {
-    let sortable_columns = rp_table.column_names.filter((x)=> x != undefined);
+    let sortable_columns = rp_table.columnNames.filter((x)=> x != undefined);
     for (let i =0; i < sortable_columns.length; i ++)
     {
-        let icolumn_name = rp_table.column_names[i].replace(' ','_');
+        let icolumn_name = rp_table.columnNames[i].replace(' ','_');
         let _sorter_id = rp_table.name +"__mheader__"+icolumn_name;
         // this sorted id will need to refer to the newly created header_div
         let _header = document.getElementById(_sorter_id);
@@ -216,14 +229,14 @@ function create_sorters(rp_table)
             console.log('could not find header with id '+ _sorter_id);
         }
     }
-    rp_table.on_changeview_function = sort_html_elements_in_view;
+    rp_table.onViewChange = sort_html_elements_in_view;
 }
 
 
 
 function add_column_header_listeners()
 {
-    for(let i =0; i <rp_table.column_names; i ++){
+    for(let i =0; i <rp_table.columnNames; i ++){
 
     }
 }

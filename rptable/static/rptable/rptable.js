@@ -1,10 +1,33 @@
-//https://www.w3schools.com/jsref/dom_obj_table.asp
+/*
+Copyright (c) 2025 Jhordany Rodriguez Parra.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge, publish, 
+distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following condition:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
+
+
+
+/*
+These Javascript classes can be used to create a html table
+intended to be fast, responsive, and useful to observe data patterns.
+refs: 
+https://www.w3schools.com/jsref/dom_obj_table.asp 
+*/
+
+
 /**
- * creates an input with id 'input_in__x' where x is id of html_cell
- * @param {html} html_cell the html object to which an input will be added.
+ * creates an input A within a html table cell B. A.id will be
+ * 'input_in__<B.id>'
+ * @param {html} html_cell the html object (B) to which an input will be added.
  * @param {string} classes_to_apply A class that will be assigned to the inputs created
  */
-function add_input_to_cell(html_cell, classes_to_apply){
+function addInputToCell(html_cell, classes_to_apply){
     let my_input = document.createElement('input');
     classes_to_apply.forEach(x=> my_input.classList.add(x));
     //my_input.classList.add(class_to_apply);
@@ -24,21 +47,19 @@ let RPTableData = class{
         this.status = 'created';
         // when creating it, if a row is passed, it means that it will be visible.
         this.display = html_row != null ? true: false;
-        this.abs_index = abs_index;
-        this.sorting_index = abs_index;
+        this.absIndex = abs_index;
+        this.sortingIndex = abs_index;
         //filter status will be true if the object passess the filter
-        this.filter_status = Array.apply(column_names, Array(column_names.length))
-                            .map(function(value, index, column_namesi)
+        this.filterStatus = Array.apply(column_names, Array(column_names.length))
+                            .map(function(value, index)
                             {
-                                //console.log(column_names);
-                                //console.log(value);
                                 return {"name": column_names[index],"status":true, "index":index}
                             });
         
     }
 
     passes_filters(){
-        return this.filter_status.findIndex((x)=> x.status==false) == -1;
+        return this.filterStatus.findIndex((x)=> x.status==false) == -1;
     }
 
     make_invisible(){
@@ -67,54 +88,54 @@ let RPTable = class{
         } 
         else
         {
-            this.rows_per_page =10;
-            this.bottom_by = 'last row'; // last row or fixed
+            this.rowsPerPage =10;
+            this.bottomBy = 'last row'; // last row or fixed
             this.parent = document.getElementById(html_parent);
-            this.header_div = document.createElement('div');
-            this.header_div.style.position = 'fixed';
-            this.unique_ids = unique_ids;
+            this.HeaderDiv = document.createElement('div');
+            this.HeaderDiv.style.position = 'fixed';
+            this.uniqueIDs = unique_ids;
             // will have the scroll property
-            this.table_container  = document.createElement('div');
-            this.table_container.id = 'rptable_container_'+ name;
-            this.table_container.classList.add('rptable_table_content_div');
-            this.table_container.style.overflowY= 'scroll';
+            this.tableContainer  = document.createElement('div');
+            this.tableContainer.id = 'rptable_container_'+ name;
+            this.tableContainer.classList.add('rptable_table_content_div');
+            this.tableContainer.style.overflowY= 'scroll';
             // you can overwrite the rows per page.
-            this.my_html = document.createElement('TABLE');
-            this.header_div.my_html = document.createElement('TABLE');
-            this.header_div.my_html.setAttribute('table-layout','fixed');
-            this.header_div.appendChild(this.header_div.my_html);
-            this.table_container.appendChild(this.my_html);
-            this.my_html.id = 0;
-            this.columns_info = [];
-            this.my_html.classList.add('rptable_table');
-            this.header_div.my_html.classList.add('rptable_table');
+            this.tableHTML = document.createElement('TABLE');
+            this.HeaderDiv.tableHTML = document.createElement('TABLE');
+            this.HeaderDiv.tableHTML.setAttribute('table-layout','fixed');
+            this.HeaderDiv.appendChild(this.HeaderDiv.tableHTML);
+            this.tableContainer.appendChild(this.tableHTML);
+            this.tableHTML.id = 0;
+            this.columnsInfo = [];
+            this.tableHTML.classList.add('rptable_table');
+            this.HeaderDiv.tableHTML.classList.add('rptable_table');
             this.header = null;
-            this.parent.appendChild(this.header_div);
-            this.parent.appendChild(this.table_container);
+            this.parent.appendChild(this.HeaderDiv);
+            this.parent.appendChild(this.tableContainer);
             // pagination
-            this.pagination_div = document.createElement('div');
-            this.pagination_div.classList.add('rptable_pag_div');
+            this.paginationDiv = document.createElement('div');
+            this.paginationDiv.classList.add('rptable_pag_div');
             let pag_button_left = document.createElement('button');
-            this.pagination_div.appendChild(pag_button_left);
+            this.paginationDiv.appendChild(pag_button_left);
             this.pagination_label = document.createElement('label');
             this.pagination_label.id = 'rptable_paglabel';
             this.textContent = '1';
-            this.pagination_div.appendChild(this.pagination_label);
+            this.paginationDiv.appendChild(this.pagination_label);
             let pag_button_right = document.createElement('button');
-            this.pagination_div.appendChild(pag_button_right);
+            this.paginationDiv.appendChild(pag_button_right);
             pag_button_left.textContent = "<-"
             pag_button_right.textContent = "->"
-            pag_button_left.addEventListener('click', ()=>this.change_view(true));
-            pag_button_right.addEventListener('click', ()=>this.change_view(false));
-            this.parent.appendChild(this.pagination_div);
+            pag_button_left.addEventListener('click', ()=>this.changeView(true));
+            pag_button_right.addEventListener('click', ()=>this.changeView(false));
+            this.parent.appendChild(this.paginationDiv);
 
         }
         this.name = name;
         // function called after the view of the table is changed (due to sorting or scrolling)
-        this.on_changeview_function = (x)=> console.log('Replace this function, it sends the table as a param');
+        this.onViewChange = (x)=> console.log('Replace this function, it sends the table as a param');
         // function called after content is changed (e.g., due to filtering)
-        let update_pag = ()=> '1/'+ parseInt(this.html_mirror.filter((y)=> y.passes_filters()).length/this.rows_per_page);
-        this.onContentChangedCallBacks = [(x) => this.pagination_label.textContent = update_pag()];
+        let updatePag = ()=> '1/'+ parseInt(this.html_mirror.filter((y)=> y.passes_filters()).length/this.rowsPerPage);
+        this.onContentChangedCallBacks = [(x) => this.pagination_label.textContent = updatePag()];
     };
 
     /**
@@ -124,21 +145,21 @@ let RPTable = class{
     set_data(data)
     {
         this.data = data;
-        this.column_names = Object.keys(this.data[0]);
-        this.columns_info = Array.apply(this.column_names, Array(this.column_names.length)).map(function(x,i){
+        this.columnNames = Object.keys(this.data[0]);
+        this.columnsInfo = Array.apply(this.columnNames, Array(this.columnNames.length)).map(function(x,i){
                                                                                 return {"index": i,
                                                                                         "name": x,
                                                                                         "type":"string",
-                                                                                        "next_sorting":"asc"};
+                                                                                        "nextSorting":"asc"};
                                                                                     });
         let reduced_data = this.data.slice(0,600);                                                                           
-        for (let c =0; c < this.column_names.length; c ++){
-            let this_column = this.column_names[c];
+        for (let c =0; c < this.columnNames.length; c ++){
+            let this_column = this.columnNames[c];
             let no_number = reduced_data.findIndex((x)=> isNaN(parseFloat(x[this_column])));
             if (no_number == -1){
-                this.columns_info[c].type = "number";   
+                this.columnsInfo[c].type = "number";   
             }
-            this.columns_info[c].name = this.column_names[c];
+            this.columnsInfo[c].name = this.columnNames[c];
         }
         // simple array that will make it easier to map the filters results
         this.indices = Array.apply(null, Array(this.data.length)).map(function(x,i){return i;});
@@ -157,20 +178,20 @@ let RPTable = class{
      */
     create_headers()
     {        
-        console.log(this.column_names);
-        this.header = this.my_html.createTHead();
+        console.log(this.columnNames);
+        this.header = this.tableHTML.createTHead();
         
-        this.header_div.classList.add('rptable_header_mirror');
+        this.HeaderDiv.classList.add('rptable_header_mirror');
         let header_row = this.header.insertRow(0);
-        let column_width = 100/this.column_names.length;
+        let column_width = 100/this.columnNames.length;
         
-        for (let i =0; i < this.column_names.length; i ++){
+        for (let i =0; i < this.columnNames.length; i ++){
             var th = document.createElement('th');
             //th.classList.add('rptable_header');
-            th.textContent = this.column_names[i];
-            //th.innerHTML = this.column_names[i];            
+            th.textContent = this.columnNames[i];
+            //th.innerHTML = this.columnNames[i];            
             //let td = header_row.insertCell();
-            th.id = this.name +"__header__"+this.column_names[i];
+            th.id = this.name +"__header__"+this.columnNames[i];
             header_row.appendChild(th);
             
         }
@@ -182,14 +203,14 @@ let RPTable = class{
      * @param {int} index_in_data the index within the original array 
      * of the data point we want to create the html row for
      */
-    create_data_row(index_in_data){
+    createDataRow(index_in_data){
         // where are we inserting it
         let data_row = this.tbody.insertRow();
-        for (let f =0; f < this.column_names.length; f++)
+        for (let f =0; f < this.columnNames.length; f++)
         {
             let td = data_row.insertCell();
-            td.textContent = this.data[index_in_data][this.column_names[f]];
-            td.id = 'rptable_'+ this.name+'_at_'+index_in_data+'_for_'+ this.column_names[f].replaceAll(' ', '_');
+            td.textContent = this.data[index_in_data][this.columnNames[f]];
+            td.id = 'rptable_'+ this.name+'_at_'+index_in_data+'_for_'+ this.columnNames[f].replaceAll(' ', '_');
             td.setAttribute('colID', f);
             //td.setAttribute('row_idx', index_in_data);       
         }
@@ -208,33 +229,33 @@ let RPTable = class{
      * @param {boolean} backwards 
      * @returns 
      */
-    change_view(backwards){
+    changeView(backwards){
         let current_view = this.get_current_view();
         if (current_view.length>0)
         {
-            let last_index = current_view.at(-1).sorting_index;
-            let first_index = current_view.at(0).sorting_index;
+            let last_index = current_view.at(-1).sortingIndex;
+            let first_index = current_view.at(0).sortingIndex;
             let next_view = [];
             let passFilters = this.html_mirror.filter((x)=> x.passes_filters() == true);
-            let total_views = parseInt(passFilters.length/ this.rows_per_page)+1;
+            let total_views = parseInt(passFilters.length/ this.rowsPerPage)+1;
             let current_nview = 0;
             if (backwards == false)
             {
-                // this filter could return when the number of this.rows_per_page elements has been reached.
-                next_view = passFilters.filter((x)=> x.sorting_index > last_index);
+                // this filter could return when the number of this.rowsPerPage elements has been reached.
+                next_view = passFilters.filter((x)=> x.sortingIndex > last_index);
                 // they could not be sorted....
-                next_view.sort((x,y)=> x.sorting_index- y.sorting_index);
+                next_view.sort((x,y)=> x.sortingIndex- y.sortingIndex);
                 let records_out = passFilters.length - next_view.length;
-                current_nview = parseInt(records_out/ this.rows_per_page)+1;
-                next_view = next_view.slice(0, this.rows_per_page);
+                current_nview = parseInt(records_out/ this.rowsPerPage)+1;
+                next_view = next_view.slice(0, this.rowsPerPage);
             }
             else
             {
-                next_view = passFilters.filter((x)=> x.sorting_index < first_index);
-                next_view.sort((x,y)=> x.sorting_index - y.sorting_index);
+                next_view = passFilters.filter((x)=> x.sortingIndex < first_index);
+                next_view.sort((x,y)=> x.sortingIndex - y.sortingIndex);
                 let records_out = next_view.length;
-                current_nview = parseInt(records_out/this.rows_per_page);
-                next_view = next_view.slice(Math.max(next_view.length- this.rows_per_page,0), next_view.length);
+                current_nview = parseInt(records_out/this.rowsPerPage);
+                next_view = next_view.slice(Math.max(next_view.length- this.rowsPerPage,0), next_view.length);
             }
             if (next_view.length ==0){
                 alert('there is no more data');
@@ -251,7 +272,7 @@ let RPTable = class{
             console.log('to make visible ('+ to_make_visible.length +')');
             console.log(to_make_visible);
             this.make_indices_visible(to_make_visible);
-            this.on_changeview_function(this);
+            this.onViewChange(this);
             //? should we do the html swapping here?
         }
     }
@@ -266,20 +287,20 @@ let RPTable = class{
         // now we fill the data 
     
         this.tbody = document.createElement('tbody');
-        this.my_html.appendChild(this.tbody);
+        this.tableHTML.appendChild(this.tbody);
         
         for (let i =0; i <this.data.length; i ++)
         {
             let data_row = null;
-            if (i < this.rows_per_page)
+            if (i < this.rowsPerPage)
             {
-                data_row = this.create_data_row(i);
+                data_row = this.createDataRow(i);
             }
             // rows that will not be shown, data_row, will be set to null
-            this.html_mirror[i] = new RPTableData(data_row, this.column_names,i); 
+            this.html_mirror[i] = new RPTableData(data_row, this.columnNames,i); 
         }
         
-        this.my_top = my_table.my_html.getBoundingClientRect().top;
+        this.my_top = my_table.tableHTML.getBoundingClientRect().top;
         setTimeout((x)=> this.re_adjust(), 100);
         window.addEventListener('resize', (x)=> this.re_adjust());
     }
@@ -301,19 +322,19 @@ let RPTable = class{
     {
         let bottom = this.get_last_row_bottom();
         if (bottom != null){
-            this.pagination_div.style.top = (bottom+20) + 'px';
+            this.paginationDiv.style.top = (bottom+20) + 'px';
         }
       
     }
 
     re_adjust(){
-        if (this.bottom_by == 'last row'){
+        if (this.bottomBy == 'last row'){
             this.re_adjust_with_last_row();
         }
         else
         {
             let new_top = this.parent.getBoundingClientRect().bottom +20;
-            this.pagination_div.style.top = new_top  +"px";
+            this.paginationDiv.style.top = new_top  +"px";
         }
     }
 
@@ -329,7 +350,7 @@ let RPTable = class{
                 if (this.html_mirror[to_make_visible[i]].row == undefined)
                 {
                     // need to create the data row
-                    this.html_mirror[to_make_visible[i]].row = this.create_data_row(to_make_visible[i])
+                    this.html_mirror[to_make_visible[i]].row = this.createDataRow(to_make_visible[i])
                 } 
                 this.html_mirror[to_make_visible[i]].make_visible();
                 // the entry on html_mirror was set to true earlier
@@ -352,7 +373,7 @@ let RPTable = class{
 
     
     show(){
-        this.my_html.display='block';
+        this.tableHTML.display='block';
     }
   
 };

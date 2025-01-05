@@ -1,3 +1,16 @@
+/*
+Copyright (c) 2025 Jhordany Rodriguez Parra.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge, publish, 
+distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following condition:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
+
 
 let my_mathematical_filters = [">=", "<=","<",">","==","!="];
 let myfunctions =[(x,y)=> x>=y
@@ -90,11 +103,11 @@ function filter_action(my_table, target, current_runs)
         let filter_value = target.value;
         // get the list of boolean values where 1 indicates
         // that the object passes the filter
-        const my_column_index = my_table.column_names.findIndex(x=>x==column);
+        const my_column_index = my_table.columnNames.findIndex(x=>x==column);
         console.log('applying filter to column '+ column + '(index '+my_column_index +') with value '+ target.value);
 
         let pass_result;
-        if (my_table.columns_info[my_column_index].type == "number")
+        if (my_table.columnsInfo[my_column_index].type == "number")
         {
             pass_result = apply_numeric_filter(my_table, filter_value, column);
         }
@@ -111,7 +124,7 @@ function filter_action(my_table, target, current_runs)
         // update the general filter function call.                               
         for (let i =0; i < pass_result.length; i ++)
         {
-            my_table.html_mirror[i].filter_status[my_column_index].status = pass_result[i];
+            my_table.html_mirror[i].filterStatus[my_column_index].status = pass_result[i];
         }
         // general display 
         let to_make_visible = [];
@@ -121,7 +134,7 @@ function filter_action(my_table, target, current_runs)
             let new_display = my_table.html_mirror[i].passes_filters();
             let displayed_before = my_table.html_mirror[i].display==true;
             //my_table.html_mirror[i].display =new_display;
-            if (total_shown < my_table.rows_per_page)
+            if (total_shown < my_table.rowsPerPage)
             {    
                 // set to true if no filter has status set to false.
                 if (displayed_before == false && new_display == true)
@@ -142,7 +155,7 @@ function filter_action(my_table, target, current_runs)
                     my_table.html_mirror[i].make_invisible();
             }
             // was visible and should remain visible, but there are already the maximum number of rows visible    
-            if (displayed_before == true && new_display == true && total_shown >= my_table.rows_per_page)
+            if (displayed_before == true && new_display == true && total_shown >= my_table.rowsPerPage)
             {
                 my_table.html_mirror[i].make_invisible();
             }
@@ -167,20 +180,20 @@ function filter_action(my_table, target, current_runs)
  */
 function create_filters(jrptable){
      // we first create the cells
-        jrptable.mirror_header = jrptable.header_div.my_html.createTHead()
+        jrptable.mirror_header = jrptable.HeaderDiv.tableHTML.createTHead()
         let mirror_header_row = jrptable.mirror_header.insertRow(0);
-        let column_width = 100/jrptable.column_names.length;
-        for (let i =0; i < jrptable.column_names.length; i ++){
+        let column_width = 100/jrptable.columnNames.length;
+        for (let i =0; i < jrptable.columnNames.length; i ++){
             let mth = document.createElement('th');
             mth.classList.add('rptable_header');
-            mth.innerHTML = jrptable.column_names[i];            
-            mth.id = jrptable.name +"__mheader__"+jrptable.column_names[i];
+            mth.innerHTML = jrptable.columnNames[i];            
+            mth.id = jrptable.name +"__mheader__"+jrptable.columnNames[i];
             mth.style.width = column_width +'%';
             mirror_header_row.appendChild(mth);  
         }
         jrptable.filter_row =jrptable.mirror_header.insertRow(1);//this.header.insertRow(1);
         console.log('inserted row filter');
-        let columns_to_filter = jrptable.column_names.filter((x)=> x != undefined);
+        let columns_to_filter = jrptable.columnNames.filter((x)=> x != undefined);
         for (let i =0; i < columns_to_filter.length; i ++)
         {
             var th = document.createElement('th');
@@ -190,7 +203,7 @@ function create_filters(jrptable){
         }
         for (let i =0; i< jrptable.filter_row.children.length; i++){
             console.log('adding');
-            let my_input = add_input_to_cell(jrptable.filter_row.children[i], ["jrptable_input", "jrptable_filter"]);
+            let my_input = addInputToCell(jrptable.filter_row.children[i], ["jrptable_input", "jrptable_filter"]);
             my_input.setAttribute('column_name', columns_to_filter[i]);
         }
         let get_edit_listener = get_edit_listener_filters(jrptable, 500, filter_action);
