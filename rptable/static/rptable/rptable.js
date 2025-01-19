@@ -268,7 +268,7 @@ let RPTable = class{
             console.log('first and last indices: '+ first_index + ' and '+ last_index);
             //console.log('next view is');
             //console.log(next_view);
-            let to_make_visible = next_view.map((x)=> x.abs_index);
+            let to_make_visible = next_view.map((x)=> x.absIndex);
             console.log('to make visible ('+ to_make_visible.length +')');
             console.log(to_make_visible);
             this.make_indices_visible(to_make_visible);
@@ -300,7 +300,7 @@ let RPTable = class{
             this.html_mirror[i] = new RPTableData(data_row, this.columnNames,i); 
         }
         
-        this.my_top = my_table.tableHTML.getBoundingClientRect().top;
+        this.my_top = this.tableHTML.getBoundingClientRect().top;
         setTimeout((x)=> this.re_adjust(), 100);
         window.addEventListener('resize', (x)=> this.re_adjust());
     }

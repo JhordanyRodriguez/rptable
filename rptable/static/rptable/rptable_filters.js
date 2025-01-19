@@ -119,7 +119,7 @@ function filter_action(my_table, target, current_runs)
         }
         else
         {
-            pass_result  = my_table.data.map((x)=> x[column].indexOf(filter_value)>=0);
+            pass_result  = my_table.data.map((x)=> x[column] != null && x[column].indexOf(filter_value)>=0);
         }
         // update the general filter function call.                               
         for (let i =0; i < pass_result.length; i ++)

@@ -17,6 +17,8 @@ The above copyright notice and this permission notice shall be included in all c
  * we get yellow =1, red =2, blue =1 by iterating through the entries.
  * 
  */
+
+var globalV = null;
 class Multiset extends Map {
   constructor(...args) {
       super(...args);
@@ -234,10 +236,21 @@ let RPgraph = class {
     let labels = [];
     let values =[];
     let iterator = counts.entries();
-    iterator.forEach(element => {
-      labels.push(element[0]);
-      values.push(element[1]);
-    });
+    console.log('these are the iterators');
+    console.log(counts);
+    globalV = iterator;
+    if (iterator != null){
+
+      let current_map_ele = iterator.next();
+      while (current_map_ele.done == false)
+      {
+        labels.push(current_map_ele.value[0]);
+        values.push(current_map_ele.value[1]);
+        current_map_ele = iterator.next();
+      }
+    }
+    
+    
     return {"labels": labels,
             "data": values
     };
