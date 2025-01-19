@@ -12,26 +12,28 @@ The above copyright notice and this permission notice shall be included in all c
 
 # Readme
 
-## Start the server: python manage.py runserver
-### service will be available at localhost:8000/rptable/
 
-Folder rptable-demo contains the point of entry to the site. This site's only function
-is to provide a quick way to showcase the functionality of RPTable. It is NOT intended
-to be a security-compliant site. For example, file settings.py contains a private key
-which in production servers should be handled differently. We provide this key to
-allow for a quick setup.
+RPTable is designed to work with minimal dependencies. Thus, simple, widely-supported Javascript APIs are used and a simple Python-based web server is provided.
 
-RPTables are designed to work with minimal installations. Simple Javascript with widely support commands are used.
-Only requirement for you to run this project is django (version 5.0.6)
+## Install:
 
- Most files are boiler plate code required by Django to serve the webpage. The key files
- to understand are:
+1. Clone the repository: e.g., git clone git@github.com:JhordanyRodriguez/rptable.git
+2. Enter the newly created directory: cd rptable
+3. Activate (or create) a python virtual environment to serve a simple demo app. See https://docs.python.org/3/tutorial/venv.html
+4. Install requirements: pip install -r requirements.txt
+
+## Start the server
+
+1. Run the app: python app.py
+2. Open browser at: localhost:8000.
+
+## important files
 
 
-1. rptable/templates/rptable/index.html: Minimal example of html webpage that calls the necessary scripts and contains some divs
+1. templates/rptable/index.html: Minimal example of html webpage that calls the necessary scripts and contains some divs
 in which the table and graphs will be held.
-2. rptable/static/rptable/json_data.js: A script that generates some random data.
-3. rptable/static/rptable/main.js: a script that contains default calls to use RPTables.
+2. static/rptable/json_data.js: A script that generates some random data.
+3. static/rptable/main.js: a script that contains default calls to use RPTables.
 
 
 Enjoy and feel free to propose changes, report bugs and contribute. Simply create a pull request and we will be happy to test and merge your changes.
